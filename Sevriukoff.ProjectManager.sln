@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sevriukoff.ProjectManager.WebApi", "Sevriukoff.ProjectManager.WebApi\Sevriukoff.ProjectManager.WebApi.csproj", "{F3E5E638-9E1C-453C-8DD6-F36D0E7111F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sevriukoff.ProjectManager.Infrastructure", "Sevriukoff.ProjectManager.Infrastructure\Sevriukoff.ProjectManager.Infrastructure.csproj", "{E60F0039-123E-49AD-B22F-7647F815F0D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sevriukoff.ProjectManager.Application", "Sevriukoff.ProjectManager.Application\Sevriukoff.ProjectManager.Application.csproj", "{3B8C282A-9419-4826-8BD7-B5AF7A0DA03E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{F3E5E638-9E1C-453C-8DD6-F36D0E7111F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3E5E638-9E1C-453C-8DD6-F36D0E7111F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3E5E638-9E1C-453C-8DD6-F36D0E7111F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E60F0039-123E-49AD-B22F-7647F815F0D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E60F0039-123E-49AD-B22F-7647F815F0D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E60F0039-123E-49AD-B22F-7647F815F0D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E60F0039-123E-49AD-B22F-7647F815F0D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B8C282A-9419-4826-8BD7-B5AF7A0DA03E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B8C282A-9419-4826-8BD7-B5AF7A0DA03E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B8C282A-9419-4826-8BD7-B5AF7A0DA03E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B8C282A-9419-4826-8BD7-B5AF7A0DA03E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

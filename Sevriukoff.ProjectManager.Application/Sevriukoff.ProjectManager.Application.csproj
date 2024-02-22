@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Sevriukoff.ProjectManager.Application</AssemblyName>
+        <RootNamespace>Sevriukoff.ProjectManager.Application</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Sevriukoff.ProjectManager.Infrastructure\Sevriukoff.ProjectManager.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="TinyMapper" Version="3.0.3" />
+    </ItemGroup>
+
+</Project>
