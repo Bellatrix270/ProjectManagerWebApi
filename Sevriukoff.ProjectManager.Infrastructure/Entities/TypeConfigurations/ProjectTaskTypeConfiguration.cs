@@ -31,6 +31,7 @@ public class ProjectTaskTypeConfiguration : IEntityTypeConfiguration<ProjectTask
         builder.HasOne(x => x.AssignedTo)
             .WithMany()
             .HasForeignKey(x => x.AssignedToId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
     }
 }

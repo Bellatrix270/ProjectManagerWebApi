@@ -21,7 +21,7 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
                 newName: "FirstName");
 
             migrationBuilder.CreateTable(
-                name: "ProjectTasks",
+                name: "ProjectTask",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -36,21 +36,21 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectTasks", x => x.Id);
+                    table.PrimaryKey("PK_ProjectTask", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectTasks_Employees_AssignedToId",
+                        name: "FK_ProjectTask_Employees_AssignedToId",
                         column: x => x.AssignedToId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ProjectTasks_Employees_CreatedById",
+                        name: "FK_ProjectTask_Employees_CreatedById",
                         column: x => x.CreatedById,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ProjectTasks_Projects_ProjectId",
+                        name: "FK_ProjectTask_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -58,18 +58,18 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectTasks_AssignedToId",
-                table: "ProjectTasks",
+                name: "IX_ProjectTask_AssignedToId",
+                table: "ProjectTask",
                 column: "AssignedToId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectTasks_CreatedById",
-                table: "ProjectTasks",
+                name: "IX_ProjectTask_CreatedById",
+                table: "ProjectTask",
                 column: "CreatedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectTasks_ProjectId",
-                table: "ProjectTasks",
+                name: "IX_ProjectTask_ProjectId",
+                table: "ProjectTask",
                 column: "ProjectId");
         }
 
@@ -77,7 +77,7 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ProjectTasks");
+                name: "ProjectTask");
 
             migrationBuilder.RenameColumn(
                 name: "LastName",
