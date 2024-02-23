@@ -114,4 +114,38 @@ public class ProjectController : ControllerBase
             return BadRequest(new { errorMessage = ex.Message });
         }
     }
+    
+    [HttpPost("{projectId:int}/tasks/{projectTaskId:int}")]
+    public async Task<IActionResult> AddTaskToProject(int projectId, int projectTaskId)
+    {
+        try
+        {
+            var success = await _projectService.AddTaskToProjectAsync(projectId, projectId);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { errorMessage = ex.Message });
+        }
+    }
+
+    [HttpDelete("{projectId:int}/tasks/{projectTaskId:int}")]
+    public async Task<IActionResult> Delete(int projectId, int projectTaskId)
+    {
+        try
+        {
+            var success = await _projectService.RemoveTaskFromProjectAsync(projectId, projectTaskId);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { errorMessage = ex.Message });
+        }
+    }
 }

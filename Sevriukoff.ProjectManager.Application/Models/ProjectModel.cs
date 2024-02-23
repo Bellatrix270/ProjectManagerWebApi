@@ -12,4 +12,5 @@ public class ProjectModel
 
     public int ManagerId { get; set; }
     public List<EmployeeModel>? Employees { get; set; }
+    public List<ProjectTaskModel>? Tasks { get; set; }
 }

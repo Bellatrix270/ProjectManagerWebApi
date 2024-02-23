@@ -13,4 +13,7 @@ public interface IProjectService
 
     Task<bool> AddEmployeeToProjectAsync(int projectId, int employeeId);
     Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId);
+
+    Task<bool> AddTaskToProjectAsync(int projectId, int taskId);
+    Task<bool> RemoveTaskFromProjectAsync(int projectId, int taskId);
 }

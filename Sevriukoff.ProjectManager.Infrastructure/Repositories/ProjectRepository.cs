@@ -16,10 +16,12 @@ public class ProjectRepository : IProjectRepository
 
     public async Task<IEnumerable<Project>> GetAllAsync()
         => await _context.Projects.Include(p => p.Employees)
+            .Include(x => x.Tasks)
             .ToListAsync();
 
     public async Task<Project?> GetByIdAsync(int id)
         => await _context.Projects.Include(p => p.Employees)
+            .Include(x => x.Tasks)
             .FirstOrDefaultAsync(p => p.Id == id);
 
     public async Task<int> AddAsync(Project project)
