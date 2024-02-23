@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Sevriukoff.ProjectManager.Infrastructure.Entities;
 
-namespace Sevriukoff.ProjectManager.Infrastructure;
+namespace Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
 
 public class ProjectTypeConfiguration : IEntityTypeConfiguration<Project>
 {
@@ -30,5 +29,10 @@ public class ProjectTypeConfiguration : IEntityTypeConfiguration<Project>
             .WithMany()
             .HasForeignKey(x => x.ManagerId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasMany(x => x.Tasks)
+            .WithOne()
+            .HasForeignKey(x => x.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

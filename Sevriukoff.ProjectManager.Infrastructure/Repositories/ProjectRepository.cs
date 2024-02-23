@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Sevriukoff.ProjectManager.Infrastructure.Base;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
+using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
-namespace Sevriukoff.ProjectManager.Infrastructure.Repository;
+namespace Sevriukoff.ProjectManager.Infrastructure.Repositories;
 
 public class ProjectRepository : IProjectRepository
 {

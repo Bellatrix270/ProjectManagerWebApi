@@ -3,7 +3,8 @@ using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
-using Sevriukoff.ProjectManager.Infrastructure.Repository;
+using Sevriukoff.ProjectManager.Infrastructure.Repositories;
+using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Application.Services;
 
