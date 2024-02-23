@@ -1,7 +1,7 @@
 ﻿using Sevriukoff.ProjectManager.Infrastructure.Base;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 
-namespace Sevriukoff.ProjectManager.Infrastructure.Repository;
+namespace Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
 public interface IProjectRepository
 {

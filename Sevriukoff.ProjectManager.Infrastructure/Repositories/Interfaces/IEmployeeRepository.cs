@@ -1,6 +1,6 @@
 ﻿using Sevriukoff.ProjectManager.Infrastructure.Entities;
 
-namespace Sevriukoff.ProjectManager.Infrastructure.Repository;
+namespace Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
 public interface IEmployeeRepository
 {
