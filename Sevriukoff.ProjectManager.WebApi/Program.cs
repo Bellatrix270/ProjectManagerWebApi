@@ -10,8 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ProjectDbContext>(
     opt => opt.UseSqlite(builder.Configuration.GetConnectionString("ProjDb")));
+
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 #endregion
 
