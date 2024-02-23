@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Models;
 
@@ -35,7 +36,7 @@ public class EmployeeController : ControllerBase
             var id = await _employeeService.AddAsync(employeeModel);
             return CreatedAtAction(nameof(Get), new { id }, id);
         }
-        catch (ArgumentException ex)
+        catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -55,7 +56,7 @@ public class EmployeeController : ControllerBase
 
             return NoContent();
         }
-        catch (ArgumentException ex)
+        catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }

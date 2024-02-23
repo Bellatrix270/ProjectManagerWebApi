@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
@@ -35,7 +36,7 @@ public class EmployeeService : IEmployeeService
     {
         if (!IsValidEmployee(employeeModel, out string errorMessage))
         {
-            throw new ArgumentException(errorMessage);
+            throw new ValidationException(errorMessage);
         }
         
         var employee = MapperWrapper.Map<Employee>(employeeModel);
@@ -48,7 +49,7 @@ public class EmployeeService : IEmployeeService
     {
         if (!IsValidEmployee(employeeModel, out string errorMessage))
         {
-            throw new ArgumentException(errorMessage);
+            throw new ValidationException(errorMessage);
         }
         
         var employee = MapperWrapper.Map<Employee>(employeeModel);

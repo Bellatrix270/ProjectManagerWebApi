@@ -112,7 +112,7 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AssignedToId")
+                    b.Property<int?>("AssignedToId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Comment")
@@ -144,7 +144,7 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectTask");
+                    b.ToTable("ProjectTasks");
                 });
 
             modelBuilder.Entity("EmployeeProject", b =>
@@ -178,8 +178,7 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
                     b.HasOne("Sevriukoff.ProjectManager.Infrastructure.Entities.Employee", "AssignedTo")
                         .WithMany()
                         .HasForeignKey("AssignedToId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Sevriukoff.ProjectManager.Infrastructure.Entities.Employee", "CreatedBy")
                         .WithMany()

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
+using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Models;
 
@@ -43,7 +44,7 @@ public class ProjectController : ControllerBase
             var id = await _projectService.AddAsync(projectModel);
             return CreatedAtAction(nameof(Get), new { id }, id);
         }
-        catch (ArgumentException ex)
+        catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -63,7 +64,7 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
-        catch (ArgumentException ex)
+        catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -91,8 +92,7 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
-        catch (Exception ex) //Теперь даже системные ошибки сервер считает как bad request, хотя должно быть InternalServerError
-                             //TODO: Создать свой класс ошибок для отлова.
+        catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -109,7 +109,7 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
-        catch (Exception ex)
+        catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
