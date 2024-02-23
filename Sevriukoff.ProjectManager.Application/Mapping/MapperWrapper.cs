@@ -23,8 +23,12 @@ public static class MapperWrapper
                     
                     TinyMapper.Bind<Employee, EmployeeModel>();
                     TinyMapper.Bind<EmployeeModel, Employee>();
+                    
                     TinyMapper.Bind<Project, ProjectModel>();
                     TinyMapper.Bind<ProjectModel, Project>();
+                    
+                    TinyMapper.Bind<ProjectTask, ProjectTaskModel>();
+                    TinyMapper.Bind<ProjectTaskModel, ProjectTask>();
 
                     _initialized = true;
                 }

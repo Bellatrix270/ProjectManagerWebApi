@@ -2,7 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Services;
 using Sevriukoff.ProjectManager.Infrastructure;
-using Sevriukoff.ProjectManager.Infrastructure.Repository;
+using Sevriukoff.ProjectManager.Infrastructure.Repositories;
+using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
+
+builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
+builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 
 #endregion
 
