@@ -1,6 +1,6 @@
-﻿namespace Sevriukoff.ProjectManager.Infrastructure.Dto;
+﻿namespace Sevriukoff.ProjectManager.Application.Models;
 
-public class EmployeeDto
+public class EmployeeModel
 {
     public int? Id { get; set; }
     public string FirstName { get; set; }

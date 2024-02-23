@@ -1,12 +1,12 @@
-﻿using Sevriukoff.ProjectManager.Infrastructure.Dto;
+﻿using Sevriukoff.ProjectManager.Application.Models;
 
 namespace Sevriukoff.ProjectManager.Application.Interfaces;
 
 public interface IEmployeeService
 {
-    Task<IEnumerable<EmployeeDto>> GetAll();
-    Task<EmployeeDto> GetById(int id);
-    Task<int> AddAsync(EmployeeDto employee);
-    Task<bool> UpdateAsync(EmployeeDto employee);
+    Task<IEnumerable<EmployeeModel>> GetAllAsync();
+    Task<EmployeeModel> GetByIdAsync(int id);
+    Task<int> AddAsync(EmployeeModel employee);
+    Task<bool> UpdateAsync(EmployeeModel employee);
     Task<bool> DeleteAsync(int id);
 }

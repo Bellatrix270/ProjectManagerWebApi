@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Interfaces;
-using Sevriukoff.ProjectManager.Infrastructure.Dto;
+using Sevriukoff.ProjectManager.Application.Models;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
@@ -18,21 +18,21 @@ public class EmployeeController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _employeeService.GetAll());
+        return Ok(await _employeeService.GetAllAsync());
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
-        return Ok(await _employeeService.GetById(id));
+        return Ok(await _employeeService.GetByIdAsync(id));
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody]EmployeeDto employeeDto)
+    public async Task<IActionResult> Post([FromBody]EmployeeModel employeeModel)
     {
         try
         {
-            var id = await _employeeService.AddAsync(employeeDto);
+            var id = await _employeeService.AddAsync(employeeModel);
             return CreatedAtAction(nameof(Get), new { id }, id);
         }
         catch (ArgumentException ex)
@@ -42,13 +42,13 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Put(int id, [FromBody]EmployeeDto employeeDto)
+    public async Task<IActionResult> Put(int id, [FromBody]EmployeeModel employeeModel)
     {
         try
         {
-            employeeDto.Id = id;
+            employeeModel.Id = id;
 
-            var success = await _employeeService.UpdateAsync(employeeDto);
+            var success = await _employeeService.UpdateAsync(employeeModel);
             
             if (!success)
                 return NotFound();

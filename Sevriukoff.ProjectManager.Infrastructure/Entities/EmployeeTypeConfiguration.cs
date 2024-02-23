@@ -12,11 +12,11 @@ public class EmployeeTypeConfiguration : IEntityTypeConfiguration<Employee>
         builder.HasIndex(x => x.Email)
             .IsUnique();
         
-        builder.Property(x => x.Firstname)
+        builder.Property(x => x.FirstName)
             .HasMaxLength(150)
             .IsRequired();
         
-        builder.Property(x => x.Lastname)
+        builder.Property(x => x.LastName)
             .HasMaxLength(150)
             .IsRequired();
         
