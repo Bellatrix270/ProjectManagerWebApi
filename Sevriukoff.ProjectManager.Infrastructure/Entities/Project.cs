@@ -13,4 +13,5 @@ public class Project
     public int ManagerId { get; set; }
     public Employee Manager { get; set; }
     public List<Employee> Employees { get; set; }
+    public List<ProjectTask> Tasks { get; set; }
 }

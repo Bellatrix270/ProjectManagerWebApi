@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
+using Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
 
 namespace Sevriukoff.ProjectManager.Infrastructure;
 
@@ -11,6 +12,7 @@ public class ProjectDbContext : DbContext
 
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Project> Projects { get; set; }
+    public DbSet<ProjectTask> ProjectTasks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -24,5 +26,6 @@ public class ProjectDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new EmployeeTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ProjectTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjectTaskTypeConfiguration());
     }
 }
