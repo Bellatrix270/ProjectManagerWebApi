@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Sevriukoff.ProjectManager.Application.Interfaces;
-using Sevriukoff.ProjectManager.Infrastructure.Dto;
+using Sevriukoff.ProjectManager.Application.Mapping;
+using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 using Sevriukoff.ProjectManager.Infrastructure.Repository;
 
@@ -15,46 +16,41 @@ public class EmployeeService : IEmployeeService
         _employeeRepository = employeeRepository;
     }
 
-    public async Task<IEnumerable<EmployeeDto>> GetAll()
+    public async Task<IEnumerable<EmployeeModel>> GetAllAsync()
     {
         var employees = await _employeeRepository.GetAllAsync();
 
-        return employees.Select(MapToDto);
+        return employees.Select(MapperWrapper.Map<EmployeeModel>);
     }
 
-    public async Task<EmployeeDto> GetById(int id)
+    public async Task<EmployeeModel> GetByIdAsync(int id)
     {
         var employee = await _employeeRepository.GetByIdAsync(id);
 
-        if (employee == null)
-        {
-            
-        }
-
-        return MapToDto(employee);
+        return MapperWrapper.Map<EmployeeModel>(employee);
     }
 
-    public async Task<int> AddAsync(EmployeeDto employeeDto)
+    public async Task<int> AddAsync(EmployeeModel employeeModel)
     {
-        if (!IsValidEmployee(employeeDto, out string errorMessage))
+        if (!IsValidEmployee(employeeModel, out string errorMessage))
         {
             throw new ArgumentException(errorMessage);
         }
         
-        var employee = MapFromDto(employeeDto); 
+        var employee = MapperWrapper.Map<Employee>(employeeModel);
         var id = await _employeeRepository.AddAsync(employee);
 
         return id;
     }
 
-    public async Task<bool> UpdateAsync(EmployeeDto employeeDto)
+    public async Task<bool> UpdateAsync(EmployeeModel employeeModel)
     {
-        if (!IsValidEmployee(employeeDto, out string errorMessage))
+        if (!IsValidEmployee(employeeModel, out string errorMessage))
         {
             throw new ArgumentException(errorMessage);
         }
         
-        var employee = MapFromDto(employeeDto);
+        var employee = MapperWrapper.Map<Employee>(employeeModel);
         return await _employeeRepository.UpdateAsync(employee);
     }
 
@@ -63,44 +59,13 @@ public class EmployeeService : IEmployeeService
         return await _employeeRepository.DeleteAsync(id);
     }
 
-    #region Mapping
-
-    private EmployeeDto MapToDto(Employee emp)
-    {
-        return new EmployeeDto
-        {
-            Id = emp.Id,
-            FirstName = emp.Firstname,
-            LastName = emp.Lastname,
-            Patronymic = emp.Patronymic,
-            FullName = string.Join(' ', emp.Lastname, emp.Firstname, emp.Patronymic),
-            Email = emp.Email
-        };
-    }
-
-    private Employee MapFromDto(EmployeeDto emp)
-    {
-        //var fullName = emp.FullName.Split(' ');
-        
-        return new Employee
-        {
-            Id = emp.Id ?? 0,
-            Firstname = emp.FirstName,
-            Lastname = emp.LastName,
-            Patronymic = emp.Patronymic,
-            Email = emp.Email
-        };
-    }
-
-    #endregion
-
     #region Validate
 
-    private bool IsValidEmployee(EmployeeDto employeeDto, out string errorMessage)
+    private bool IsValidEmployee(EmployeeModel employeeModel, out string errorMessage)
     {
         errorMessage = string.Empty;
         
-        var isValidName = !employeeDto.FirstName.Any(char.IsDigit); //TODO: Validate
+        var isValidName = !employeeModel.FirstName.Any(char.IsDigit); //TODO: Validate
 
         if (!isValidName)
         {
@@ -108,13 +73,13 @@ public class EmployeeService : IEmployeeService
             return false;
         }
 
-        if (!IsValidEmail(employeeDto.Email))
+        if (!IsValidEmail(employeeModel.Email))
         {
             errorMessage = "Invalid email format.";
             return false;
         }
 
-        if (!IsUniqueEmail(employeeDto.Email))
+        if (!IsUniqueEmail(employeeModel.Email))
         {
             errorMessage = "Employee with this email already exists.";
             return false;
