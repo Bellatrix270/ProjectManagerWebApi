@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Models;
@@ -23,6 +22,23 @@ public class ProjectController : ControllerBase
         return Ok(await _projectService.GetByIdAsync(id));
     }
 
+    /// <summary>
+    /// Получает список проектов с возможностью фильтрации, сортировки и настройки связанных свойств.
+    /// </summary>
+    /// <remarks>
+    /// Примеры запросов:
+    /// - /project?startDateFrom=2023-01-01&amp;startDateTo=2025-01-01&amp;priority=3&amp;sortBy=PriorityDesc&amp;includes=Employees
+    /// - /project?startDateFrom=2023-01-01&amp;startDateTo=2025-01-01&amp;priority=3&amp;sortBy=Name&amp;includes=Tasks;Employees
+    /// - /project
+    /// </remarks>
+    /// <param name="startDateFrom">Дата начала периода, в котором был запущен проект.</param>
+    /// <param name="startDateTo">Дата окончания периода, в котором был запущен проект.</param>
+    /// <param name="priority">Приоритет проекта от 1 до 10.</param>
+    /// <param name="includes">Список связанных сущностей для включения их данных в ответ (разделенный точкой с запятой список имен связанных сущностей).</param>
+    /// <param name="sortBy">Поле, по которому происходит сортировка. Поддерживаются поля основной сущности проекта. Например sortBy=PriorityDesc</param>
+    /// <returns>Список проектов, отфильтрованный и отсортированный в соответствии с переданными параметрами.</returns>
+    /// <response code="200">Вовзращяет результирующий список проектов</response>
+    /// <response code="400">Некоректная настройка фильтров. Подробности в errorMessage.</response>
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] DateTime? startDateFrom,
@@ -44,9 +60,6 @@ public class ProjectController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
-
-        var filteredProjects = _projectService.GetFiltered(startDateFrom.Value, startDateTo.Value, priority.Value);
-        return Ok(filteredProjects);
     }
 
     [HttpPost]

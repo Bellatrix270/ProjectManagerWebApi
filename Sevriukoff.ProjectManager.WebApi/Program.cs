@@ -1,4 +1,6 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Services;
 using Sevriukoff.ProjectManager.Infrastructure;
@@ -25,7 +27,17 @@ builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.UseInlineDefinitionsForEnums();
+    
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Project manager API", Version = "v1", Description = "123"});
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
+
 
 var app = builder.Build();
 
