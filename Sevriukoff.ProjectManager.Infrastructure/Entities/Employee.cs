@@ -1,8 +1,9 @@
-﻿namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
+﻿using Sevriukoff.ProjectManager.Infrastructure.Base;
 
-public class Employee
+namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
+
+public class Employee : BaseEntity
 {
-    public int Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Patronymic { get; set; }

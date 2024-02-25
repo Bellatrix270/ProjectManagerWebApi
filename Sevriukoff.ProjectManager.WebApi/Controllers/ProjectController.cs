@@ -24,12 +24,25 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] DateTime? startDateFrom, [FromQuery] DateTime? startDateTo, [FromQuery] int? priority)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] DateTime? startDateFrom,
+        [FromQuery] DateTime? startDateTo,
+        [FromQuery] int? priority,
+        [FromQuery] string? includes,
+        [FromQuery] string? sortBy)
     {
-        if (startDateFrom == null && startDateTo == null && priority == null)
+        try
         {
-            var projects = await _projectService.GetAllAsync();
-            return Ok(projects);
+            var queryCount = HttpContext.Request.Query.Count;
+        
+            if (queryCount == 1 && !string.IsNullOrEmpty(includes) || queryCount == 0)
+                return Ok(await _projectService.GetAllAsync(includes?.Split(';') ?? Array.Empty<string>()));
+        
+            return Ok(await _projectService.GetFilteredAndSortedAsync(startDateFrom, startDateTo, priority, sortBy));
+        }
+        catch (SpecificationException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var filteredProjects = _projectService.GetFiltered(startDateFrom.Value, startDateTo.Value, priority.Value);

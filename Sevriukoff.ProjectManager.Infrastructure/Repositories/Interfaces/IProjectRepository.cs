@@ -5,10 +5,10 @@ namespace Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
 public interface IProjectRepository
 {
-    Task<IEnumerable<Project>> GetAllAsync();
-    Task<Project?> GetByIdAsync(int id);
+    Task<IEnumerable<Project>> GetAllAsync(ISpecification<Project>? specification = null);
+    Task<Project?> GetByIdAsync(int id, ISpecification<Project> specification = null);
     Task<int> AddAsync(Project project);
     Task<bool> UpdateAsync(Project project);
     Task<bool> DeleteAsync(int id);
-    IEnumerable<Project> GetBySpecification(Specification<Project> specification);
+    Task<IEnumerable<Project>> GetBySpecification(ISpecification<Project> specification);
 }

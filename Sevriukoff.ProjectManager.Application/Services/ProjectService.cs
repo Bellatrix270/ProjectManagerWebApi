@@ -1,10 +1,12 @@
 ﻿using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.Application.Specification;
 using Sevriukoff.ProjectManager.Application.Specification.Project;
 using Sevriukoff.ProjectManager.Infrastructure.Base;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
+using PrioritySpecification = Sevriukoff.ProjectManager.Application.Specification.Project.PrioritySpecification;
 
 namespace Sevriukoff.ProjectManager.Application.Services;
 
@@ -23,7 +25,7 @@ public class ProjectService : IProjectService
         _taskRepository = taskRepository;
     }
     
-    public async Task<IEnumerable<ProjectModel>> GetAllAsync()
+    public async Task<IEnumerable<ProjectModel>> GetAllAsync(params string[] includes)
     {
         var projects = await _projectRepository.GetAllAsync();
 
@@ -56,17 +58,23 @@ public class ProjectService : IProjectService
         return await _projectRepository.DeleteAsync(id);
     }
 
-    public IEnumerable<ProjectModel> GetFiltered(DateTime startDateFrom, DateTime startDateTo, int priority)
+    public async Task<IEnumerable<ProjectModel>> GetFilteredAndSortedAsync(DateTime? startDateFrom, DateTime? startDateTo,
+        int? priority, string? sortBy, params string[] includes)
     {
-        var startDateSpec = new StartDateSpecification(startDateFrom, startDateTo);
+        var startDateSpec = new TimePeriodSpecification(startDateFrom, startDateTo);
         var prioritySpec = new PrioritySpecification(priority);
-        var combinedSpec = new CompositeSpecification<Project>(startDateSpec, prioritySpec);
+        var sortingSpec = new SortingSpecification<Project>(sortBy!);
 
-        var filtered = _projectRepository.GetBySpecification(combinedSpec);
+        var filtered = await _projectRepository.GetBySpecification
+        (
+            startDateSpec
+                .And(prioritySpec)
+                .And(sortingSpec)
+        );
 
         return filtered.Select(MapperWrapper.Map<ProjectModel>);
     }
-
+    
     public async Task<bool> AddEmployeeToProjectAsync(int projectId, int employeeId)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);

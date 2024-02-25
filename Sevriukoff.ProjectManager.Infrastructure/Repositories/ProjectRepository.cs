@@ -14,12 +14,20 @@ public class ProjectRepository : IProjectRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Project>> GetAllAsync()
-        => await _context.Projects.Include(p => p.Employees)
+    public async Task<IEnumerable<Project>> GetAllAsync(ISpecification<Project>? specification = null)
+    {
+        if (specification != null)
+        {
+            return await SpecificationEvaluator<Project>.GetQuery(_context.Set<Project>().AsQueryable(), specification)
+                .ToListAsync();
+        }
+        
+        return await _context.Projects.Include("Employees")
             .Include(x => x.Tasks)
             .ToListAsync();
+    }
 
-    public async Task<Project?> GetByIdAsync(int id)
+    public async Task<Project?> GetByIdAsync(int id, ISpecification<Project> specification = null)
         => await _context.Projects.Include(p => p.Employees)
             .Include(x => x.Tasks)
             .FirstOrDefaultAsync(p => p.Id == id);
@@ -43,9 +51,12 @@ public class ProjectRepository : IProjectRepository
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Project> GetBySpecification(Specification<Project> specification)
+    public async Task<IEnumerable<Project>> GetBySpecification(ISpecification<Project> specification)
     {
-        return _context.Projects.Where(specification.ToExpression()).ToList();
+        var query = SpecificationEvaluator<Project>.GetQuery(_context.Set<Project>().AsQueryable(),
+            specification);
+        
+        return await query.ToListAsync();
     }
 
     public async Task<IEnumerable<Project>> GetByFilters(DateTime? startDateFrom, DateTime? startDateTo, int? priority)

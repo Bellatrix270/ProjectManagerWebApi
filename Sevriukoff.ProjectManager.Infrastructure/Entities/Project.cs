@@ -1,8 +1,9 @@
-﻿namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
+﻿using Sevriukoff.ProjectManager.Infrastructure.Base;
 
-public class Project
+namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
+
+public class Project : BaseEntity
 {
-    public int Id { get; set; }
     public string Name { get; set; }
     public string CustomerCompany { get; set; }
     public string ExecutorCompany { get; set; }

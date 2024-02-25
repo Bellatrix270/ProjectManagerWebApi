@@ -1,8 +1,10 @@
-﻿namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using Sevriukoff.ProjectManager.Infrastructure.Base;
 
-public class ProjectTask
+namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
+
+public class ProjectTask : BaseEntity
 {
-    public int Id { get; set; }
     public int ProjectId { get; set; }
     public string Name { get; set; }
     public int CreatedById { get; set; }
@@ -14,9 +16,21 @@ public class ProjectTask
     public int Priority { get; set; }
 }
 
+/// <summary>
+/// Status of task in project
+/// </summary>
 public enum ProjectTaskStatus
 {
+    /// <summary>
+    /// ToDo
+    /// </summary>
     ToDo,
+    /// <summary>
+    /// InProgress
+    /// </summary>
     InProgress,
+    /// <summary>
+    /// Done
+    /// </summary>
     Done
 }
