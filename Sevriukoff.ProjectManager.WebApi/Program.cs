@@ -1,13 +1,18 @@
 using System.Reflection;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Sevriukoff.ProjectManager.Application.Factories;
 using Sevriukoff.ProjectManager.Application.Interfaces;
+using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Application.Services;
+using Sevriukoff.ProjectManager.Application.Strategies.ProjectUpdateStrategy;
+using Sevriukoff.ProjectManager.Application.Strategies.TaskUpdateStrategy;
 using Sevriukoff.ProjectManager.Infrastructure;
 using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 using Sevriukoff.ProjectManager.Infrastructure.Repositories;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +45,23 @@ builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
+
+builder.Services.AddTransient<ITaskUpdateStrategy, AdministratorTaskUpdateStrategy>();
+builder.Services.AddTransient<ITaskUpdateStrategy, ManagerTaskUpdateStrategy>();
+builder.Services.AddTransient<ITaskUpdateStrategy, EmployeeTaskUpdateStrategy>();
+
+builder.Services.AddTransient<TaskUpdateStrategyFactory>();
+
+builder.Services.AddTransient<IProjectUpdateStrategy, AdministratorProjectUpdateStrategy>();
+builder.Services.AddTransient<IProjectUpdateStrategy, ManagerProjectUpdateStrategy>();
+builder.Services.AddTransient<IProjectUpdateStrategy, EmployeeProjectUpdateStrategy>();
+
+builder.Services.AddTransient<ProjectUpdateStrategyFactory>();
+
+#endregion
+
+#region Auth
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
