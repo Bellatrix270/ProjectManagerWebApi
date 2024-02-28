@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Nelibur.ObjectMapper;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 
 namespace Sevriukoff.ProjectManager.Application.Mapping;
@@ -24,7 +25,7 @@ public static class MapperWrapper
                     TinyMapper.Bind<Employee, EmployeeModel>();
                     TinyMapper.Bind<EmployeeModel, Employee>();
                     
-                    TinyMapper.Bind<Project, ProjectModel>();
+                    TinyMapper.Bind<Project, ProjectModel>(c => c.Ignore(x => x.Employees));
                     TinyMapper.Bind<ProjectModel, Project>();
                     
                     TinyMapper.Bind<ProjectTask, ProjectTaskModel>();
@@ -36,16 +37,23 @@ public static class MapperWrapper
         }
     }
 
-    public static TTarget Map<TSource, TTarget>(TSource source, TTarget target = default(TTarget))
-        => (TTarget)MapInternal(source, typeof(TTarget), source.GetType());
+    public static TTarget? Map<TSource, TTarget>(TSource? source, TTarget target = default(TTarget))
+        => (TTarget?)MapInternal(source, typeof(TTarget), typeof(TSource));
 
-    public static object Map(Type sourceType, Type targetType, object source, object target = null)
+    public static object? Map(Type sourceType, Type targetType, object? source, object? target = null)
         => MapInternal(source, targetType, sourceType);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="source"></param>
+    /// <typeparam name="TTarget"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="NullReferenceException">If a source equals null</exception> 
     public static TTarget Map<TTarget>(object source)
-        => (TTarget)MapInternal(source, typeof(TTarget), source.GetType());
+        => (TTarget)MapInternal(source, typeof(TTarget), source.GetType())!;
 
-    private static object MapInternal(object source, Type targetType, Type sourceType, object target = null)
+    private static object? MapInternal(object? source, Type targetType, Type sourceType, object? target = null)
     {
         Initialize();
         
