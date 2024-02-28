@@ -26,11 +26,11 @@ public class ProjectTaskService : IProjectTaskService
         return projectTasks.Select(MapperWrapper.Map<ProjectTaskModel>);
     }
 
-    public async Task<ProjectTaskModel> GetByIdAsync(int id)
+    public async Task<ProjectTaskModel?> GetByIdAsync(int id)
     {
         var projectTask = await _projectTaskRepository.GetByIdAsync(id);
 
-        return MapperWrapper.Map<ProjectTaskModel>(projectTask);
+        return MapperWrapper.Map<ProjectTask, ProjectTaskModel>(projectTask);
     }
 
     public async Task<int> AddAsync(ProjectTaskModel projectTaskModel)

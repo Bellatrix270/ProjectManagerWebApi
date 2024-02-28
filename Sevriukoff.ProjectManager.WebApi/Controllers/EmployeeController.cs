@@ -25,7 +25,9 @@ public class EmployeeController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
-        return Ok(await _employeeService.GetByIdAsync(id));
+        var employee = await _employeeService.GetByIdAsync(id);
+        
+        return employee == null ? NotFound() : Ok(employee);
     }
 
     [HttpPost]

@@ -19,7 +19,9 @@ public class ProjectController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
-        return Ok(await _projectService.GetByIdAsync(id));
+        var project = await _projectService.GetByIdAsync(id);
+        
+        return project == null ? NotFound() : Ok(project);
     }
 
     /// <summary>

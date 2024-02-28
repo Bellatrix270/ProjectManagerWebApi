@@ -32,11 +32,11 @@ public class ProjectService : IProjectService
         return projects.Select(MapperWrapper.Map<ProjectModel>);
     }
 
-    public async Task<ProjectModel> GetByIdAsync(int id)
+    public async Task<ProjectModel?> GetByIdAsync(int id)
     {
         var project = await _projectRepository.GetByIdAsync(id);
 
-        return MapperWrapper.Map<ProjectModel>(project);
+        return MapperWrapper.Map<Project, ProjectModel>(project);
     }
 
     public async Task<int> AddAsync(ProjectModel projectModel)

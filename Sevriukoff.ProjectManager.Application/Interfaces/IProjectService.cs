@@ -6,7 +6,7 @@ namespace Sevriukoff.ProjectManager.Application.Interfaces;
 public interface IProjectService
 {
     Task<IEnumerable<ProjectModel>> GetAllAsync(params string[] includes);
-    Task<ProjectModel> GetByIdAsync(int id);
+    Task<ProjectModel?> GetByIdAsync(int id);
     Task<int> AddAsync(ProjectModel projectModel);
     Task<bool> UpdateAsync(ProjectModel projectModel);
     Task<bool> DeleteAsync(int id);
