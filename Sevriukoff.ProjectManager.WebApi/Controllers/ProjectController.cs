@@ -1,10 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.WebApi.Helpers;
+using ValidationException = Sevriukoff.ProjectManager.Application.Exception.ValidationException;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
+/// <summary>
+/// Контроллер для управления проектами
+/// </summary>
 [ApiController]
 [Authorize(Policy = nameof(UserRole.Manager))]
 [Route("/api/v1/[controller]")]
@@ -17,6 +24,23 @@ public class ProjectController : ControllerBase
         _projectService = projectService;
     }
 
+    /// <summary>
+    /// Получает информацию о проекте по его идентификатору.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     GET /api/v1/project/1
+    /// 
+    /// </remarks>
+    /// <param name="id">Идентификатор проекта.</param>
+    /// <returns>Информация о проекте.</returns>
+    /// <response code="200">Информация о проекте успешно получена.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Проект с указанным идентификатором не найден.</response>
+    [ProducesResponseType(typeof(EmployeeModel), 200)]
+    [ProducesResponseType(404)]
+    [Authorize(Policy = nameof(UserRole.Administrator))]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
@@ -62,7 +86,33 @@ public class ProjectController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-
+    
+    /// <summary>
+    /// Создает новый проект.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     POST /api/v1/project
+    ///     {
+    ///         "Name" : "Новый проект",
+    ///         "CustomerCompany": "Название заказчика",
+    ///         "ExecutorCompany": "Название исполнителя",
+    ///         "StartDate": "2024-02-20",
+    ///         "EndDate": "2024-02-25",
+    ///         "Priority": 3,
+    ///         "ManagerId": "4fc2bbd4-9e5e-4286-b943-600d9c82fecc"
+    ///     }
+    /// 
+    /// </remarks>
+    /// <param name="projectModel">Модель нового проекта.</param>
+    /// <returns>Результат создания нового проекта.</returns>
+    /// <response code="201">Проект успешно создан.</response>
+    /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
+    /// <response code="401">Доступ запрещён.</response>
+    [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
+    [Authorize(Policy = nameof(UserRole.Administrator))]
     [HttpPost]
     public async Task<IActionResult> Post([FromBody]ProjectModel projectModel)
     {
@@ -76,7 +126,30 @@ public class ProjectController : ControllerBase
             return BadRequest(new { errorMessage = ex.Message });
         }
     }
-
+    
+    /// <summary>
+    /// Обновляет информацию о проекте по его идентификатору.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     PUT /api/v1/project/1
+    ///     {
+    ///         "Name": "Измененное название проекта",
+    ///         "Priority": 5
+    ///     }
+    /// 
+    /// </remarks>
+    /// <param name="id">Идентификатор проекта.</param>
+    /// <param name="projectModel">Модель обновленной информации о проекте.</param>
+    /// <returns>Результат обновления информации о проекте.</returns>
+    /// <response code="204">Информация о проекте успешно обновлена.</response>
+    /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
+    /// <response code="401">Доступ запрещён.</response>
+    /// <response code="404">Проект с указанным идентификатором не найден.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Put(int id, [FromBody]ProjectModel projectModel)
     {
@@ -98,7 +171,24 @@ public class ProjectController : ControllerBase
             return BadRequest(new { errorMessage = ex.Message });
         }
     }
-
+    
+    /// <summary>
+    /// Удаляет проект по его идентификатору.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     DELETE /api/v1/project/1
+    /// 
+    /// </remarks>
+    /// <param name="id">Идентификатор проекта.</param>
+    /// <returns>Результат удаления проекта.</returns>
+    /// <response code="204">Проект успешно удален.</response>
+    /// <response code="401">Доступ запрещён.</response>
+    /// <response code="404">Проект с указанным идентификатором не найден.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [Authorize(Policy = nameof(UserRole.Administrator))]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -110,8 +200,28 @@ public class ProjectController : ControllerBase
         return NoContent();
     }
     
-    [HttpPost("{projectId:int}/employees/{employeeId:int}")]
-    public async Task<IActionResult> AddEmployeeToProject(int projectId, int employeeId)
+    /// <summary>
+    /// Добавляет сотрудника к проекту.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     POST /api/v1/project/1/employees/a62b3a2f-93be-4db2-ac46-9045a320d44b
+    /// 
+    /// </remarks>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="employeeId">Идентификатор сотрудника.</param>
+    /// <returns>Результат добавления сотрудника к проекту.</returns>
+    /// <response code="204">Сотрудник успешно добавлен к проекту.</response>
+    /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или не достаточный уровень прав.</response>
+    /// <response code="404">Проект или сотрудник с указанным идентификатором не найден.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(404)]
+    [HttpPost("{projectId:int}/employees/{employeeId:guid}")]
+    public async Task<IActionResult> AddEmployeeToProject(int projectId, Guid employeeId)
     {
         try
         {
@@ -123,14 +233,37 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
+        catch (AccessDeniedException ex)
+        {
+            return Unauthorized(new { errorMessage = ex.Message });
+        }
         catch (ValidationException ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
     }
 
-    [HttpDelete("{projectId:int}/employees/{employeeId:int}")]
-    public async Task<IActionResult> RemoveEmployeeFromProject(int projectId, int employeeId)
+    /// <summary>
+    /// Удаляет сотрудника из проекта.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     DELETE /api/v1/project/1/employees/a62b3a2f-93be-4db2-ac46-9045a320d44b
+    /// 
+    /// </remarks>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="employeeId">Идентификатор сотрудника.</param>
+    /// <returns>Результат удаления сотрудника из проекта.</returns>
+    /// <response code="204">Сотрудник успешно удален из проекта.</response>
+    /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Проект или сотрудник с указанным идентификатором не найден.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [HttpDelete("{projectId:int}/employees/{employeeId:guid}")]
+    public async Task<IActionResult> RemoveEmployeeFromProject(int projectId, Guid employeeId)
     {
         try
         {
@@ -148,6 +281,25 @@ public class ProjectController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Добавляет задачу к проекту.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     POST /api/v1/project/1/tasks/2
+    /// 
+    /// </remarks>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="projectTaskId">Идентификатор задачи.</param>
+    /// <returns>Результат добавления задачи к проекту.</returns>
+    /// <response code="204">Задача успешно добавлена к проекту.</response>
+    /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Проект или задача с указанным идентификатором не найдены.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
     [HttpPost("{projectId:int}/tasks/{projectTaskId:int}")]
     public async Task<IActionResult> AddTaskToProject(int projectId, int projectTaskId)
     {
@@ -167,6 +319,25 @@ public class ProjectController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Удаляет задачу из проекта.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     DELETE /api/v1/project/1/tasks/2
+    /// 
+    /// </remarks>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="projectTaskId">Идентификатор задачи.</param>
+    /// <returns>Результат удаления задачи из проекта.</returns>
+    /// <response code="204">Задача успешно удалена из проекта.</response>
+    /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Проект или задача с указанным идентификатором не найдены.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
     [HttpDelete("{projectId:int}/tasks/{projectTaskId:int}")]
     public async Task<IActionResult> RemoveTaskFromProject(int projectId, int projectTaskId)
     {

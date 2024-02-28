@@ -54,6 +54,22 @@ public class ProjectTaskController : ControllerBase
         ));
     }
     
+    /// <summary>
+    /// Получает задачу проекта по её идентификатору.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     GET /api/v1/projecttask/1
+    /// 
+    /// </remarks>
+    /// <param name="id">Идентификатор задачи проекта.</param>
+    /// <returns>Задача проекта с указанным идентификатором.</returns>
+    /// <response code="200">Возвращает задачу проекта с указанным идентификатором.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Задача с указанным идентификатором не найдена.</response>
+    [ProducesResponseType(typeof(ProjectTaskModel), 200)]
+    [ProducesResponseType(404)]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
@@ -62,6 +78,31 @@ public class ProjectTaskController : ControllerBase
         return task == null ? NotFound() : Ok(task);
     }
     
+    /// <summary>
+    /// Создает новую задачу проекта.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     POST /api/v1/projecttask
+    ///     {
+    ///         "ProjectId": 1,
+    ///         "Name": "Название задачи",
+    ///         "CreatedById": "2991E2CA-E64A-4832-8C5D-B2F8B9A1F305",
+    ///         "Status": 0,
+    ///         "Comment": "Описание задачи",
+    ///         "Priority": 1
+    ///     }
+    /// 
+    /// </remarks>
+    /// <param name="projectTaskModel">Модель задачи проекта для создания.</param>
+    /// <returns>Созданную задачу проекта.</returns>
+    /// <response code="201">Возвращает созданную задачу проекта.</response>
+    /// <response code="400">Возвращается в случае, если переданы некорректные данные для создания задачи.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
+    [Authorize(Policy = nameof(UserRole.Manager))]
     [HttpPost]
     public async Task<IActionResult> Post([FromBody]ProjectTaskModel projectTaskModel)
     {
@@ -76,6 +117,28 @@ public class ProjectTaskController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Обновляет существующую задачу проекта.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     PUT /api/v1/projecttask/1
+    ///     {
+    ///         "Status": 2,
+    ///     }
+    /// 
+    /// </remarks>
+    /// <param name="id">Идентификатор задачи проекта для обновления.</param>
+    /// <param name="projectTaskModel">Модель задачи проекта с обновленными данными.</param>
+    /// <returns>Без содержимого.</returns>
+    /// <response code="204">Возвращает успешный результат обновления задачи проекта.</response>
+    /// <response code="400">Возвращается в случае, если переданы некорректные данные для обновления задачи.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Задача проекта с указанным идентификатором не найдена.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Put(int id, [FromBody]ProjectTaskModel projectTaskModel)
     {
@@ -85,7 +148,7 @@ public class ProjectTaskController : ControllerBase
             
             projectTaskModel.Id = id;
 
-            var success = await _projectTaskService.UpdateAsync(projectTaskModel);
+            var success = await _projectTaskService.UpdateAsync(projectTaskModel, userContext);
             
             if (!success)
                 return NotFound();
@@ -98,6 +161,23 @@ public class ProjectTaskController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Удаляет задачу по её идентификатору.
+    /// </summary>
+    /// <remarks>
+    /// Пример запроса:
+    /// 
+    ///     DELETE /api/v1/projecttask/1
+    /// 
+    /// </remarks>
+    /// <param name="id">Идентификатор задачи проекта для удаления.</param>
+    /// <returns>Без содержимого.</returns>
+    /// <response code="204">Возвращает успешный результат удаления задачи проекта.</response>
+    /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
+    /// <response code="404">Задача проекта с указанным идентификатором не найдена.</response>
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [Authorize(Policy = nameof(UserRole.Administrator))]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

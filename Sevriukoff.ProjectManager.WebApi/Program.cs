@@ -109,9 +109,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.UseInlineDefinitionsForEnums();
-    
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Project manager API", Version = "v1", Description = "123"});
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Project manager API",
+        Version = "v1",
+        Description =
+            "API для управления проектами, разработанный в рамках выполнения тестового задания от компании Sibers",
+        Contact = new OpenApiContact
+        {
+            Name = "Igor Sevriukoff", 
+            Url = new Uri("https://github.com/Sevriukoff")
+        }
+    });
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
