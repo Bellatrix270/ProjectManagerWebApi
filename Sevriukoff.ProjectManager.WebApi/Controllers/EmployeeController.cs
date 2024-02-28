@@ -6,6 +6,7 @@ using Sevriukoff.ProjectManager.Application.Models;
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
 [ApiController]
+[Authorize(Policy = nameof(UserRole.Administrator))]
 [Route("/api/v1/[controller]")]
 public class EmployeeController : ControllerBase
 {
