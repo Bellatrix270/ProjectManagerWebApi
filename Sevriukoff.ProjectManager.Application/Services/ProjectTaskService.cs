@@ -5,6 +5,8 @@ using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Application.Specification;
 using Sevriukoff.ProjectManager.Application.Specification.ProjectTask;
+using Sevriukoff.ProjectManager.Application.Strategies.TaskUpdateStrategy;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
@@ -13,10 +15,16 @@ namespace Sevriukoff.ProjectManager.Application.Services;
 public class ProjectTaskService : IProjectTaskService
 {
     private readonly IProjectTaskRepository _projectTaskRepository;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly TaskUpdateStrategyFactory _strategyFactory;
 
-    public ProjectTaskService(IProjectTaskRepository projectTaskRepository)
+    public ProjectTaskService(IProjectTaskRepository projectTaskRepository,
+        IEmployeeRepository employeeRepository,
+        TaskUpdateStrategyFactory  strategyFactory)
     {
         _projectTaskRepository = projectTaskRepository;
+        _employeeRepository = employeeRepository;
+        _strategyFactory = strategyFactory;
     }
     
     public async Task<IEnumerable<ProjectTaskModel>> GetAllAsync()
@@ -40,11 +48,15 @@ public class ProjectTaskService : IProjectTaskService
 
         return id;
     }
-
-    public async Task<bool> UpdateAsync(ProjectTaskModel projectTaskModel)
+    
+    public async Task<bool> UpdateAsync(ProjectTaskModel projectTaskModel, UserContext userContext)
     {
-        var projectTask = MapperWrapper.Map<ProjectTask>(projectTaskModel);
-        return await _projectTaskRepository.UpdateAsync(projectTask);
+        var strategy = _strategyFactory.CreateStrategy(userContext);
+
+        if (!strategy.CanUpdate(projectTaskModel, userContext))
+            throw new AccessDeniedException("У вас нет прав на изменение задачи.");
+
+        return await strategy.UpdateAsync(projectTaskModel, userContext);
     }
 
     public async Task<bool> DeleteAsync(int id)
