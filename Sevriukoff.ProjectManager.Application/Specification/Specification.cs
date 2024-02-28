@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Sevriukoff.ProjectManager.Infrastructure.Base;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Application.Specification;
 

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Base;
 

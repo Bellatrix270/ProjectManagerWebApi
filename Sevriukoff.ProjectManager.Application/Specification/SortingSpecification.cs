@@ -1,11 +1,14 @@
 ﻿using Sevriukoff.ProjectManager.Application.Exception;
 
-namespace Sevriukoff.ProjectManager.Application.Specification.Project;
+namespace Sevriukoff.ProjectManager.Application.Specification;
 
 public class SortingSpecification<T> : Specification<T>
 {
-    public SortingSpecification(string sortBy)
+    public SortingSpecification(string? sortBy)
     {
+        if (string.IsNullOrEmpty(sortBy))
+            return;
+        
         const string desc = "Desc";
         var propertyPath = sortBy;
         bool descending = false;
