@@ -1,4 +1,4 @@
-﻿namespace Sevriukoff.ProjectManager.Application.Specification.Project;
+﻿namespace Sevriukoff.ProjectManager.Application.Specification;
 
 public class IncludingSpecification<T> : Specification<T>
 {
