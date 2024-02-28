@@ -1,8 +1,12 @@
-﻿using Sevriukoff.ProjectManager.Application.Interfaces;
+﻿using Sevriukoff.ProjectManager.Application.Exception;
+using Sevriukoff.ProjectManager.Application.Factories;
+using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.Application.Specification;
+using Sevriukoff.ProjectManager.Application.Specification.ProjectTask;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Application.Services;
 
@@ -46,5 +50,44 @@ public class ProjectTaskService : IProjectTaskService
     public async Task<bool> DeleteAsync(int id)
     {
         return await _projectTaskRepository.DeleteAsync(id);
+    }
+
+    public async Task<IEnumerable<ProjectTaskModel>> GetFilteredAndSortedAsync(ProjectTaskStatus? status, int? priority, 
+        Guid? createdById, Guid? assignedToId, string? sortBy, UserContext userContext, params string[] includes)
+    {
+        if (userContext.Role != UserRole.Administrator)
+            createdById = userContext.UserId;
+        
+        var prioritySpec = new TaskPrioritySpecification(priority);
+        var statusSpec = new TaskStatusSpecification(status);
+        var creatorAndExecutorSpec = new TaskByCreatorAndExecutorSpecification(createdById, assignedToId);
+        var sortingSpec = new SortingSpecification<ProjectTask>(sortBy);
+
+        var combinedSpec = prioritySpec.And(statusSpec)
+                                                            .And(sortingSpec)
+                                                            .And(creatorAndExecutorSpec);
+
+        var filteredTasks = (await _projectTaskRepository.GetBySpecificationAsync(combinedSpec)).ToList();
+        var mappedTask = filteredTasks.Select(MapperWrapper.Map<ProjectTaskModel>).ToList();
+
+        foreach (var task in mappedTask)
+        {
+            if (includes.Contains(nameof(ProjectTaskModel.CreatedBy)))
+            {
+                task.CreatedBy = MapperWrapper.Map<EmployeeModel>(await _employeeRepository.GetByIdAsync(task.CreatedById));
+            }
+
+            if (includes.Contains(nameof(ProjectTaskModel.AssignedTo)))
+            {
+                task.AssignedTo = MapperWrapper.Map<EmployeeModel>(await _employeeRepository.GetByIdAsync(task.AssignedToId.Value));
+            }
+        }
+
+        return mappedTask;
+    }
+
+    private List<ProjectTaskModel> IncludeEmployee()
+    {
+        throw new NotImplementedException();
     }
 }

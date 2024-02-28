@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Sevriukoff.ProjectManager.Infrastructure.Base;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Repositories;
 
@@ -43,5 +44,13 @@ public class ProjectTaskRepository : IProjectTaskRepository
         }
 
         return false;
+    }
+
+    public async Task<IEnumerable<ProjectTask>> GetBySpecificationAsync(ISpecification<ProjectTask> specification)
+    {
+        var query = SpecificationEvaluator<ProjectTask>.GetQuery(_context.Set<ProjectTask>().AsQueryable(),
+            specification);
+        
+        return await query.ToListAsync();
     }
 }
