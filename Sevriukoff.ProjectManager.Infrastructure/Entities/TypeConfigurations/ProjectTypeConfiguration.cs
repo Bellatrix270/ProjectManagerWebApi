@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
 
@@ -20,19 +21,12 @@ public class ProjectTypeConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(x => x.ExecutorCompany)
             .HasMaxLength(255)
             .IsRequired();
-
-        builder.HasMany(x => x.Employees)
-            .WithMany(x => x.Projects)
-            .UsingEntity(x => x.ToTable("EmployeeProject"));
-
-        builder.HasOne(x => x.Manager)
-            .WithMany()
-            .HasForeignKey(x => x.ManagerId)
-            .OnDelete(DeleteBehavior.Restrict);
         
         builder.HasMany(x => x.Tasks)
             .WithOne()
             .HasForeignKey(x => x.ProjectId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Ignore(x => x.Employees);
     }
 }

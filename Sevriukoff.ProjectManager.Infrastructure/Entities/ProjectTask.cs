@@ -7,12 +7,14 @@ public class ProjectTask : BaseEntity
 {
     public int ProjectId { get; set; }
     public string Name { get; set; }
-    public int CreatedById { get; set; }
-    public Employee CreatedBy { get; set; }
-    public int? AssignedToId { get; set; }
-    public Employee? AssignedTo { get; set; }
+    public Guid CreatedById { get; set; }
+    public Guid? AssignedToId { get; set; }
     public ProjectTaskStatus Status { get; set; }
     public string Comment { get; set; }
+    
+    /// <summary>
+    /// Целочисленное значение от 1 до 10
+    /// </summary>
     public int Priority { get; set; }
 }
 

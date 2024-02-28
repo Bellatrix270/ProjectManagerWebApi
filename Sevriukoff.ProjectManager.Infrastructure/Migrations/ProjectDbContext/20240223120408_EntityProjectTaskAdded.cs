@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Sevriukoff.ProjectManager.Infrastructure.Migrations
+namespace Sevriukoff.ProjectManager.Infrastructure.Migrations.ProjectDbContext
 {
     /// <inheritdoc />
     public partial class EntityProjectTaskAdded : Migration

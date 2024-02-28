@@ -1,4 +1,6 @@
-﻿using Sevriukoff.ProjectManager.Infrastructure.Base;
+﻿using Sevriukoff.ProjectManager.Infrastructure.Authorization;
+using Sevriukoff.ProjectManager.Infrastructure.Base;
+using Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
 
@@ -11,8 +13,7 @@ public class Project : BaseEntity
     public DateTime EndDate  { get; set; }
     public int Priority { get; set; }
 
-    public int ManagerId { get; set; }
-    public Employee Manager { get; set; }
-    public List<Employee> Employees { get; set; }
+    public Guid ManagerId { get; set; }
+    public List<Guid> Employees { get; set; }
     public List<ProjectTask> Tasks { get; set; }
 }

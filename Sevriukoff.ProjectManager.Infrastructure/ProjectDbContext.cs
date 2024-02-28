@@ -6,13 +6,21 @@ namespace Sevriukoff.ProjectManager.Infrastructure;
 
 public class ProjectDbContext : DbContext
 {
+    #region ctor's
+
     public ProjectDbContext(DbContextOptions<ProjectDbContext> opt) : base(opt) { }
 
-    public ProjectDbContext() { }
+    #endregion
 
-    public DbSet<Employee> Employees { get; set; }
+    #region props
+
+    public DbSet<ProjectEmployee> ProjectEmployee { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectTask> ProjectTasks { get; set; }
+
+    #endregion
+
+    #region methods
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -24,8 +32,10 @@ public class ProjectDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new EmployeeTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ProjectTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ProjectTaskTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjectEmployeeTypeConfiguration());
     }
+
+    #endregion
 }

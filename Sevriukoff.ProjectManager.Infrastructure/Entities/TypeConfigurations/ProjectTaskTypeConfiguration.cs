@@ -22,16 +22,5 @@ public class ProjectTaskTypeConfiguration : IEntityTypeConfiguration<ProjectTask
         builder.Property(x => x.Comment)
             .HasMaxLength(500)
             .IsRequired(false);
-        
-        builder.HasOne(x => x.CreatedBy)
-            .WithMany()
-            .HasForeignKey(x => x.CreatedById)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.AssignedTo)
-            .WithMany()
-            .HasForeignKey(x => x.AssignedToId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired(false);
     }
 }
