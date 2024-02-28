@@ -1,7 +1,7 @@
 ﻿using Sevriukoff.ProjectManager.Infrastructure.Base;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 
-namespace Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
+namespace Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 public interface IProjectRepository
 {
@@ -10,5 +10,7 @@ public interface IProjectRepository
     Task<int> AddAsync(Project project);
     Task<bool> UpdateAsync(Project project);
     Task<bool> DeleteAsync(int id);
-    Task<IEnumerable<Project>> GetBySpecification(ISpecification<Project> specification);
+    Task<IEnumerable<Project>> GetBySpecificationAsync(ISpecification<Project> specification);
+    Task<bool> AddEmployeeToProjectAsync(int projectId, Guid employeeId);
+    Task<bool> RemoveEmployeeFromProjectAsync(int projectId, Guid employeeId);
 }

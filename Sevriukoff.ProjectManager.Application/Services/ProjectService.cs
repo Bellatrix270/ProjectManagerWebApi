@@ -59,18 +59,36 @@ public class ProjectService : IProjectService
     }
 
     public async Task<IEnumerable<ProjectModel>> GetFilteredAndSortedAsync(DateTime? startDateFrom, DateTime? startDateTo,
-        int? priority, string? sortBy, params string[] includes)
+        int? priority, string? sortBy, UserContext userContext, params string[] includes)
     {
-        var startDateSpec = new TimePeriodSpecification(startDateFrom, startDateTo);
-        var prioritySpec = new PrioritySpecification(priority);
-        var sortingSpec = new SortingSpecification<Project>(sortBy!);
+        var startDateSpec = new ProjectStartDatePeriodSpecification(startDateFrom, startDateTo);
+        var prioritySpec = new ProjectPrioritySpecification(priority);
+        var managerSpec = new ProjectByManagerIdSpecification(userContext.UserId);
+        var sortingSpec = new SortingSpecification<Project>(sortBy);
+        var includeSpec = new IncludingSpecification<Project>(includes.Where(x => x != nameof(Project.Employees)).ToArray());
 
-        var filtered = await _projectRepository.GetBySpecification
-        (
-            startDateSpec
-                .And(prioritySpec)
-                .And(sortingSpec)
-        );
+        var combinedSpec = startDateSpec.And(prioritySpec).And(sortingSpec).And(includeSpec);
+
+        if (userContext.Role != UserRole.Administrator)
+            combinedSpec = combinedSpec.And(managerSpec);
+
+        var filtered = (await _projectRepository.GetBySpecificationAsync(combinedSpec)).ToList();
+
+        var projects = filtered.Select(MapperWrapper.Map<ProjectModel>).ToList();
+        
+        if (includes.Contains(nameof(ProjectModel.Employees)))
+        {
+            for (int i = 0; i < filtered.Count; i++)
+            {
+                projects[i].Employees = new List<EmployeeModel>();
+                for (int j = 0; j < filtered[i].Employees.Count; j++)
+                {
+                    var emp = MapperWrapper.Map<EmployeeModel>(
+                        await _employeeRepository.GetByIdAsync(filtered[i].Employees[j]));
+                    projects[i].Employees!.Add(emp);
+                }
+            }
+        }
 
         return filtered.Select(MapperWrapper.Map<ProjectModel>);
     }

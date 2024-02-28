@@ -11,7 +11,7 @@ public interface IProjectService
     Task<bool> UpdateAsync(ProjectModel projectModel);
     Task<bool> DeleteAsync(int id);
     Task<IEnumerable<ProjectModel>> GetFilteredAndSortedAsync(DateTime? startDateFrom, DateTime? startDateTo,
-        int? priority, string? sortBy, params string[] includes);
+        int? priority, string? sortBy, UserContext userContext, params string[] includes);
     
     Task<bool> AddEmployeeToProjectAsync(int projectId, int employeeId);
     Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId);
