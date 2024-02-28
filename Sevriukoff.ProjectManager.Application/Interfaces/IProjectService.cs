@@ -8,7 +8,7 @@ public interface IProjectService
     Task<IEnumerable<ProjectModel>> GetAllAsync(params string[] includes);
     Task<ProjectModel?> GetByIdAsync(int id);
     Task<int> AddAsync(ProjectModel projectModel);
-    Task<bool> UpdateAsync(ProjectModel projectModel);
+    Task<bool> UpdateAsync(ProjectModel projectModel, UserContext userContext);
     Task<bool> DeleteAsync(int id);
     Task<IEnumerable<ProjectModel>> GetFilteredAndSortedAsync(DateTime? startDateFrom, DateTime? startDateTo,
         int? priority, string? sortBy, UserContext userContext, params string[] includes);

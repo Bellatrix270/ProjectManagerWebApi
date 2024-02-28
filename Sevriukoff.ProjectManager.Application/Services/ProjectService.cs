@@ -1,12 +1,12 @@
-﻿using Sevriukoff.ProjectManager.Application.Interfaces;
+﻿using Sevriukoff.ProjectManager.Application.Exception;
+using Sevriukoff.ProjectManager.Application.Factories;
+using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Application.Specification;
 using Sevriukoff.ProjectManager.Application.Specification.Project;
-using Sevriukoff.ProjectManager.Infrastructure.Base;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
-using PrioritySpecification = Sevriukoff.ProjectManager.Application.Specification.Project.PrioritySpecification;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Application.Services;
 
@@ -15,14 +15,17 @@ public class ProjectService : IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IProjectTaskRepository _taskRepository;
+    private readonly ProjectUpdateStrategyFactory _strategyFactory;
 
     public ProjectService(IProjectRepository projectRepository,
         IEmployeeRepository employeeRepository,
-        IProjectTaskRepository taskRepository)
+        IProjectTaskRepository taskRepository,
+        ProjectUpdateStrategyFactory strategyFactory)
     {
         _projectRepository = projectRepository;
         _employeeRepository = employeeRepository;
         _taskRepository = taskRepository;
+        _strategyFactory = strategyFactory;
     }
     
     public async Task<IEnumerable<ProjectModel>> GetAllAsync(params string[] includes)
@@ -47,10 +50,14 @@ public class ProjectService : IProjectService
         return id;
     }
 
-    public async Task<bool> UpdateAsync(ProjectModel projectModel)
+    public async Task<bool> UpdateAsync(ProjectModel projectModel, UserContext userContext)
     {
-        var project = MapperWrapper.Map<Project>(projectModel);
-        return await _projectRepository.UpdateAsync(project);
+        var strategy = _strategyFactory.CreateStrategy(userContext);
+
+        if (!strategy.CanUpdate(projectModel, userContext))
+            throw new AccessDeniedException("У вас нет прав на изменение задачи.");
+
+        return await strategy.UpdateAsync(projectModel, userContext);
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -90,7 +97,7 @@ public class ProjectService : IProjectService
             }
         }
 
-        return filtered.Select(MapperWrapper.Map<ProjectModel>);
+        return projects;
     }
     
     public async Task<bool> AddEmployeeToProjectAsync(int projectId, Guid employeeId, UserContext userContext)
@@ -180,13 +187,9 @@ public class ProjectService : IProjectService
     private void CheckUserContext(UserContext userContext, UserRole minRoleRequired, Guid projectManagerId)
     {
         if (userContext.Role > minRoleRequired)
-        {
             return;
-        }
         
         if (userContext.Role < minRoleRequired || userContext.UserId != projectManagerId)
-        {
             throw new AccessDeniedException("Access Denied");
-        }
     }
 }
