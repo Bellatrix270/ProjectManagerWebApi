@@ -13,11 +13,11 @@ public interface IProjectService
     Task<IEnumerable<ProjectModel>> GetFilteredAndSortedAsync(DateTime? startDateFrom, DateTime? startDateTo,
         int? priority, string? sortBy, UserContext userContext, params string[] includes);
     
-    Task<bool> AddEmployeeToProjectAsync(int projectId, int employeeId);
-    Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId);
+    Task<bool> AddEmployeeToProjectAsync(int projectId, Guid employeeId, UserContext userContext);
+    Task<bool> RemoveEmployeeFromProjectAsync(int projectId, Guid employeeId, UserContext userContext);
 
-    Task<bool> AddTaskToProjectAsync(int projectId, int taskId);
-    Task<bool> RemoveTaskFromProjectAsync(int projectId, int taskId);
+    Task<bool> AddTaskToProjectAsync(int projectId, int taskId, UserContext userContext);
+    Task<bool> RemoveTaskFromProjectAsync(int projectId, int taskId, UserContext userContext);
     
     //Task<ISpecification<ProjectModel>> GetFilteredAsync(DateTime? startDateFrom, DateTime? startDateTo, int? priority);
     //Task<ISpecification<ProjectModel>> GetSortedAsync(string? sortBy, bool? ascending = true);

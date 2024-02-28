@@ -93,77 +93,100 @@ public class ProjectService : IProjectService
         return filtered.Select(MapperWrapper.Map<ProjectModel>);
     }
     
-    public async Task<bool> AddEmployeeToProjectAsync(int projectId, int employeeId)
+    public async Task<bool> AddEmployeeToProjectAsync(int projectId, Guid employeeId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
             return false;
         
-        if (project.Employees.Any(e => e.Id == employeeId))
+        CheckUserContext(userContext, UserRole.Manager, project.ManagerId);
+        
+        if (project.Employees.Any(e => e == employeeId))
             return false;
 
         var employee = await _employeeRepository.GetByIdAsync(employeeId);
         if (employee == null)
             return false;
 
-        project.Employees.Add(employee);
-        return await _projectRepository.UpdateAsync(project);
+        return await _projectRepository.AddEmployeeToProjectAsync(projectId, employeeId);
     }
 
-    public async Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId)
-    {
-        var project = await _projectRepository.GetByIdAsync(projectId);
-        if (project == null)
-            return false;
-
-        var employeeToRemove = project.Employees.FirstOrDefault(e => e.Id == employeeId);
-        if (employeeToRemove == null)
-            return false;
-
-        project.Employees.Remove(employeeToRemove);
-        return await _projectRepository.UpdateAsync(project);
-    }
-
-    public async Task<bool> AddTaskToProjectAsync(int projectId, int taskId)
+    public async Task<bool> RemoveEmployeeFromProjectAsync(int projectId, Guid employeeId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
             return false;
         
-        if (project.Tasks.Any(t => t.Id == taskId))
+        CheckUserContext(userContext, UserRole.Manager, project.ManagerId);
+
+        var employee = project.Employees.Find(x => x == employeeId);
+
+        if (employee == null)
             return false;
+
+        return await _projectRepository.RemoveEmployeeFromProjectAsync(projectId, employeeId);
+    }
+
+    /// <summary>
+    /// Добавление задачи к проекту. Если на выполенение задачи назначен сотрудник то он будет добавлен в проект.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <param name="taskId"></param>
+    /// <param name="userContext"></param>
+    /// <returns></returns>
+    public async Task<bool> AddTaskToProjectAsync(int projectId, int taskId, UserContext userContext)
+    {
+        var project = await _projectRepository.GetByIdAsync(projectId);
+        if (project == null)
+            return false;
+        
+        CheckUserContext(userContext, UserRole.Manager, project.ManagerId);
 
         var task = await _taskRepository.GetByIdAsync(taskId);
         if (task == null)
             return false;
         
-        project.Tasks.Add(task);
+        if (project.Tasks.Any(t => t.Id == taskId))
+            return false;
         
-        if (task.AssignedTo != null)
-            project.Employees.Add(task.AssignedTo);
-        else if (task.AssignedToId.HasValue)
-            project.Employees.Add((await _employeeRepository.GetByIdAsync(task.AssignedToId.Value))!);
+        project.Tasks.Add(task);
+
+        if (task.AssignedToId.HasValue && !project.Employees.Exists(x => x == task.AssignedToId))
+            await _projectRepository.AddEmployeeToProjectAsync(projectId, task.AssignedToId.Value);
 
         return await _projectRepository.UpdateAsync(project);
     }
 
-    public async Task<bool> RemoveTaskFromProjectAsync(int projectId, int taskId)
+    public async Task<bool> RemoveTaskFromProjectAsync(int projectId, int taskId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
             return false;
+
+        CheckUserContext(userContext, UserRole.Manager, project.ManagerId);
 
         var task = project.Tasks.FirstOrDefault(e => e.Id == taskId);
         if (task == null)
             return false;
 
         project.Tasks.Remove(task);
-        
-        if (task.AssignedTo != null)
-            project.Employees.Remove(task.AssignedTo);
-        else if (task.AssignedToId.HasValue)
-            project.Employees.Remove((await _employeeRepository.GetByIdAsync(task.AssignedToId.Value))!);
+
+        if (task.AssignedToId.HasValue && !project.Employees.Exists(x => x == task.AssignedToId))
+            await _projectRepository.RemoveEmployeeFromProjectAsync(projectId, task.AssignedToId.Value);
 
         return await _projectRepository.UpdateAsync(project);
+    }
+    
+    private void CheckUserContext(UserContext userContext, UserRole minRoleRequired, Guid projectManagerId)
+    {
+        if (userContext.Role > minRoleRequired)
+        {
+            return;
+        }
+        
+        if (userContext.Role < minRoleRequired || userContext.UserId != projectManagerId)
+        {
+            throw new AccessDeniedException("Access Denied");
+        }
     }
 }
