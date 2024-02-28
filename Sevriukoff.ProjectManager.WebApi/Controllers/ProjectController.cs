@@ -33,30 +33,28 @@ public class ProjectController : ControllerBase
     /// - /project?startDateFrom=2023-01-01&amp;startDateTo=2025-01-01&amp;priority=3&amp;sortBy=Name&amp;includes=Tasks;Employees
     /// - /project
     /// </remarks>
-    /// <param name="startDateFrom">Дата начала периода, в котором был запущен проект.</param>
-    /// <param name="startDateTo">Дата окончания периода, в котором был запущен проект.</param>
-    /// <param name="priority">Приоритет проекта от 1 до 10.</param>
-    /// <param name="includes">Список связанных сущностей для включения их данных в ответ (разделенный точкой с запятой список имен связанных сущностей).</param>
-    /// <param name="sortBy">Поле, по которому происходит сортировка. Поддерживаются поля основной сущности проекта. Например sortBy=PriorityDesc</param>
+    /// <param name="queryParameters">Параметры запроса.</param>
     /// <returns>Список проектов, отфильтрованный и отсортированный в соответствии с переданными параметрами.</returns>
     /// <response code="200">Вовзращяет результирующий список проектов</response>
     /// <response code="400">Некоректная настройка фильтров. Подробности в errorMessage.</response>
+    /// <response code="401">Доступ запрещён.</response>
+    [ProducesResponseType(typeof(IEnumerable<ProjectModel>), 200)]
+    [ProducesResponseType(400)]
     [HttpGet]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] DateTime? startDateFrom,
-        [FromQuery] DateTime? startDateTo,
-        [FromQuery] int? priority,
-        [FromQuery] string? includes,
-        [FromQuery] string? sortBy)
+    public async Task<IActionResult> GetAll([FromQuery] ProjectQueryParameters queryParameters)
     {
         try
         {
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
             var queryCount = HttpContext.Request.Query.Count;
-        
-            if (queryCount == 1 && !string.IsNullOrEmpty(includes) || queryCount == 0)
-                return Ok(await _projectService.GetAllAsync(includes?.Split(';') ?? Array.Empty<string>()));
-        
-            return Ok(await _projectService.GetFilteredAndSortedAsync(startDateFrom, startDateTo, priority, sortBy));
+            var userContext = UserContextHelper.GetUserContext(User);
+
+            if ((userRole == nameof(UserRole.Administrator) && queryCount == 1 && !string.IsNullOrEmpty(queryParameters.Includes)) ||
+                (userRole == nameof(UserRole.Administrator) && queryCount == 0))
+                return Ok(await _projectService.GetAllAsync(queryParameters.Includes?.Split(';') ?? Array.Empty<string>()));
+
+            return Ok(await _projectService.GetFilteredAndSortedAsync(queryParameters.StartDateFrom, queryParameters.StartDateTo, queryParameters.Priority, queryParameters.SortBy, userContext, queryParameters.Includes?.Split(';') ?? Array.Empty<string>()));
+
         }
         catch (SpecificationException ex)
         {
