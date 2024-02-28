@@ -10,10 +10,12 @@ namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 public class EmployeeController : ControllerBase
 {
     private readonly IEmployeeService _employeeService;
+    private readonly IAuthService _authService;
 
-    public EmployeeController(IEmployeeService employeeService)
+    public EmployeeController(IEmployeeService employeeService, IAuthService authService)
     {
         _employeeService = employeeService;
+        _authService = authService;
     }
     
     [HttpGet]
@@ -35,8 +37,12 @@ public class EmployeeController : ControllerBase
     {
         try
         {
-            var id = await _employeeService.AddAsync(employeeModel);
-            return CreatedAtAction(nameof(Get), new { id }, id);
+            var (id, errors) = await _authService.RegisterAsync(employeeModel);
+
+            if (!errors.Any())
+                return CreatedAtAction(nameof(Get), new { id }, id);
+
+            return BadRequest(errors);
         }
         catch (ValidationException ex)
         {
