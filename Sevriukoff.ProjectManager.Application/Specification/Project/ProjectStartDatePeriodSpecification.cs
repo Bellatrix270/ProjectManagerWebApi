@@ -1,8 +1,8 @@
 ﻿namespace Sevriukoff.ProjectManager.Application.Specification.Project;
 
-public class TimePeriodSpecification : Specification<Infrastructure.Entities.Project>
+public class ProjectStartDatePeriodSpecification : Specification<Infrastructure.Entities.Project>
 {
-    public TimePeriodSpecification(DateTime? startDateFrom, DateTime? startDateTo)
+    public ProjectStartDatePeriodSpecification(DateTime? startDateFrom, DateTime? startDateTo)
     {
         if (!startDateFrom.HasValue) return;
 
