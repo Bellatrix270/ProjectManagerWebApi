@@ -30,7 +30,7 @@ public class ProjectService : IProjectService
     
     public async Task<IEnumerable<ProjectModel>> GetAllAsync(params string[] includes)
     {
-        var projects = await _projectRepository.GetAllAsync();
+        var projects = await _projectRepository.GetAllAsync(new IncludingSpecification<Project>(includes));
 
         return projects.Select(MapperWrapper.Map<ProjectModel>);
     }
