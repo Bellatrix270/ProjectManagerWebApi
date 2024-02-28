@@ -6,6 +6,7 @@ using Sevriukoff.ProjectManager.Application.Models;
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
 [ApiController]
+[Authorize(Policy = nameof(UserRole.Manager))]
 [Route("/api/v1/[controller]")]
 public class ProjectController : ControllerBase
 {
@@ -81,9 +82,11 @@ public class ProjectController : ControllerBase
     {
         try
         {
+            var userContext = UserContextHelper.GetUserContext(User);
+            
             projectModel.Id = id;
 
-            var success = await _projectService.UpdateAsync(projectModel);
+            var success = await _projectService.UpdateAsync(projectModel, userContext);
             
             if (!success)
                 return NotFound();
@@ -112,7 +115,9 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            var success = await _projectService.AddEmployeeToProjectAsync(projectId, employeeId);
+            var userContext = UserContextHelper.GetUserContext(User);
+            
+            var success = await _projectService.AddEmployeeToProjectAsync(projectId, employeeId, userContext);
             if (!success)
                 return NotFound();
 
@@ -129,7 +134,9 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            var success = await _projectService.RemoveEmployeeFromProjectAsync(projectId, employeeId);
+            var userContext = UserContextHelper.GetUserContext(User);
+            
+            var success = await _projectService.RemoveEmployeeFromProjectAsync(projectId, employeeId, userContext);
             if (!success)
                 return NotFound();
 
@@ -146,7 +153,9 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            var success = await _projectService.AddTaskToProjectAsync(projectId, projectId);
+            var userContext = UserContextHelper.GetUserContext(User);
+            
+            var success = await _projectService.AddTaskToProjectAsync(projectId, projectId, userContext);
             if (!success)
                 return NotFound();
 
@@ -159,11 +168,13 @@ public class ProjectController : ControllerBase
     }
 
     [HttpDelete("{projectId:int}/tasks/{projectTaskId:int}")]
-    public async Task<IActionResult> Delete(int projectId, int projectTaskId)
+    public async Task<IActionResult> RemoveTaskFromProject(int projectId, int projectTaskId)
     {
         try
         {
-            var success = await _projectService.RemoveTaskFromProjectAsync(projectId, projectTaskId);
+            var userContext = UserContextHelper.GetUserContext(User);
+            
+            var success = await _projectService.RemoveTaskFromProjectAsync(projectId, projectTaskId, userContext);
             if (!success)
                 return NotFound();
 

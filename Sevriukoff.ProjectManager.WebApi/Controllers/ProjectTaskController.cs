@@ -81,6 +81,8 @@ public class ProjectTaskController : ControllerBase
     {
         try
         {
+            var userContext = UserContextHelper.GetUserContext(User);
+            
             projectTaskModel.Id = id;
 
             var success = await _projectTaskService.UpdateAsync(projectTaskModel);
