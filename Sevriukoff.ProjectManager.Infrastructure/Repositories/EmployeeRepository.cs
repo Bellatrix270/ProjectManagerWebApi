@@ -1,51 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Sevriukoff.ProjectManager.Infrastructure.Entities;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
+using Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Repositories;
 
 //TODO: CancellationTokens
 public class EmployeeRepository : IEmployeeRepository
 {
-    private readonly ProjectDbContext _context;
+    private readonly ProjectDbContext _projectContext;
+    private readonly AuthDbContext _authContext;
 
-    public EmployeeRepository(ProjectDbContext context)
+    public EmployeeRepository(ProjectDbContext projectContext, AuthDbContext authContext)
     {
-        _context = context;
+        _projectContext = projectContext;
+        _authContext = authContext;
     }
     
     public async Task<IEnumerable<Employee>> GetAllAsync()
-        => await _context.Employees.ToListAsync();
+        => await _authContext.Users.ToListAsync();
 
-    public async Task<Employee?> GetByIdAsync(int id)
-        => await _context.Employees.FindAsync(id);
+    public async Task<Employee?> GetByIdAsync(Guid id)
+        => await _authContext.Users.FindAsync(id);
 
     public async Task<Employee?> GetByEmailAsync(string email)
     {
-        return await _context.Employees.FirstOrDefaultAsync(emp => emp.Email == email);
-    }
-
-    public async Task<int> AddAsync(Employee employee)
-    {
-        await _context.Employees.AddAsync(employee);
-        await _context.SaveChangesAsync();
-        
-        return employee.Id;
-    }
-
-    public async Task<bool> UpdateAsync(Employee employee)
-    {
-        _context.Employees.Update(employee);
-        return await _context.SaveChangesAsync() > 0;
+        return await _authContext.Users.FirstOrDefaultAsync(emp => emp.Email == email);
     }
     
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> UpdateAsync(Employee employee)
     {
-        var employeeToDelete = await _context.Employees.FindAsync(id);
+        _authContext.Users.Update(employee);
+        return await _authContext.SaveChangesAsync() > 0;
+    }
+    
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var employeeToDelete = await _authContext.Users.FindAsync(id);
         if (employeeToDelete != null)
         {
-            _context.Employees.Remove(employeeToDelete);
-            return await _context.SaveChangesAsync() > 0;
+            _authContext.Users.Remove(employeeToDelete);
+            return await _authContext.SaveChangesAsync() > 0;
         }
 
         return false;

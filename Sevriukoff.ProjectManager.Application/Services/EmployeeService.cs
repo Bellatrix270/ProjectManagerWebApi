@@ -3,9 +3,8 @@ using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
-using Sevriukoff.ProjectManager.Infrastructure.Entities;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories;
-using Sevriukoff.ProjectManager.Infrastructure.Repositories.Interfaces;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
+using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Application.Services;
 
@@ -25,24 +24,11 @@ public class EmployeeService : IEmployeeService
         return employees.Select(MapperWrapper.Map<EmployeeModel>);
     }
 
-    public async Task<EmployeeModel> GetByIdAsync(int id)
+    public async Task<EmployeeModel?> GetByIdAsync(Guid id)
     {
         var employee = await _employeeRepository.GetByIdAsync(id);
 
-        return MapperWrapper.Map<EmployeeModel>(employee);
-    }
-
-    public async Task<int> AddAsync(EmployeeModel employeeModel)
-    {
-        if (!IsValidEmployee(employeeModel, out string errorMessage))
-        {
-            throw new ValidationException(errorMessage);
-        }
-        
-        var employee = MapperWrapper.Map<Employee>(employeeModel);
-        var id = await _employeeRepository.AddAsync(employee);
-
-        return id;
+        return MapperWrapper.Map<Employee, EmployeeModel>(employee);
     }
 
     public async Task<bool> UpdateAsync(EmployeeModel employeeModel)
@@ -56,7 +42,7 @@ public class EmployeeService : IEmployeeService
         return await _employeeRepository.UpdateAsync(employee);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         return await _employeeRepository.DeleteAsync(id);
     }

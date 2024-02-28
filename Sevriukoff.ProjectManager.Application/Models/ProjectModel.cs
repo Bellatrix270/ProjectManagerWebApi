@@ -10,7 +10,7 @@ public class ProjectModel
     public DateTime EndDate  { get; set; }
     public int Priority { get; set; }
 
-    public int ManagerId { get; set; }
+    public Guid ManagerId { get; set; }
     public List<EmployeeModel>? Employees { get; set; }
     public List<ProjectTaskModel>? Tasks { get; set; }
 }

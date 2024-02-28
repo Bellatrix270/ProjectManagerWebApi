@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 
 namespace Sevriukoff.ProjectManager.Application.Mapping;
@@ -24,6 +25,7 @@ public class EmployeeClassConverter : TypeConverter
             FullName = $"{concreteValue.FirstName} {concreteValue.LastName} {concreteValue.Patronymic}",
             Email = concreteValue.Email
         };
+        
         return result;
     }
 }
