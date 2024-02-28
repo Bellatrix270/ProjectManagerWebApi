@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
+namespace Sevriukoff.ProjectManager.Infrastructure.Authorization;
 
 public class EmployeeTypeConfiguration : IEntityTypeConfiguration<Employee>
 {
