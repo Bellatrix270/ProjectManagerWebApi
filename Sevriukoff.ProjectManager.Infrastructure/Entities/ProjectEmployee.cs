@@ -2,6 +2,6 @@
 
 public class ProjectEmployee
 {
-    public int ProjectId { get; set; }
+    public Guid ProjectId { get; set; }
     public Guid EmployeeId { get; set; }
 }

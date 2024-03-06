@@ -34,14 +34,14 @@ public class ProjectTaskService : IProjectTaskService
         return projectTasks.Select(MapperWrapper.Map<ProjectTaskModel>);
     }
 
-    public async Task<ProjectTaskModel?> GetByIdAsync(int id)
+    public async Task<ProjectTaskModel?> GetByIdAsync(Guid id)
     {
         var projectTask = await _projectTaskRepository.GetByIdAsync(id);
 
         return MapperWrapper.Map<ProjectTask, ProjectTaskModel>(projectTask);
     }
 
-    public async Task<int> AddAsync(ProjectTaskModel projectTaskModel)
+    public async Task<Guid> AddAsync(ProjectTaskModel projectTaskModel)
     {
         var projectTask = MapperWrapper.Map<ProjectTask>(projectTaskModel);
         var id = await _projectTaskRepository.AddAsync(projectTask);
@@ -59,7 +59,7 @@ public class ProjectTaskService : IProjectTaskService
         return await strategy.UpdateAsync(projectTaskModel, userContext);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         return await _projectTaskRepository.DeleteAsync(id);
     }
@@ -79,7 +79,7 @@ public class ProjectTaskService : IProjectTaskService
                                                             .And(sortingSpec)
                                                             .And(creatorAndExecutorSpec);
 
-        var filteredTasks = (await _projectTaskRepository.GetBySpecificationAsync(combinedSpec)).ToList();
+        var filteredTasks = (await _projectTaskRepository.GetAllAsync(combinedSpec)).ToList();
         var mappedTask = filteredTasks.Select(MapperWrapper.Map<ProjectTaskModel>).ToList();
 
         foreach (var task in mappedTask)

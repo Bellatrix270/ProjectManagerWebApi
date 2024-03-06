@@ -41,8 +41,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(typeof(EmployeeModel), 200)]
     [ProducesResponseType(404)]
     [Authorize(Policy = nameof(UserRole.Administrator))]
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> Get(int id)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> Get(Guid id)
     {
         var project = await _projectService.GetByIdAsync(id);
         
@@ -150,8 +150,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Put(int id, [FromBody]ProjectModel projectModel)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Put(Guid id, [FromBody]ProjectModel projectModel)
     {
         try
         {
@@ -189,8 +189,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
     [Authorize(Policy = nameof(UserRole.Administrator))]
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
         var success = await _projectService.DeleteAsync(id);
         
@@ -220,8 +220,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     [ProducesResponseType(404)]
-    [HttpPost("{projectId:int}/employees/{employeeId:guid}")]
-    public async Task<IActionResult> AddEmployeeToProject(int projectId, Guid employeeId)
+    [HttpPost("{projectId:guid}/employees/{employeeId:guid}")]
+    public async Task<IActionResult> AddEmployeeToProject(Guid projectId, Guid employeeId)
     {
         try
         {
@@ -262,8 +262,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [HttpDelete("{projectId:int}/employees/{employeeId:guid}")]
-    public async Task<IActionResult> RemoveEmployeeFromProject(int projectId, Guid employeeId)
+    [HttpDelete("{projectId:guid}/employees/{employeeId:guid}")]
+    public async Task<IActionResult> RemoveEmployeeFromProject(Guid projectId, Guid employeeId)
     {
         try
         {
@@ -300,8 +300,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [HttpPost("{projectId:int}/tasks/{projectTaskId:int}")]
-    public async Task<IActionResult> AddTaskToProject(int projectId, int projectTaskId)
+    [HttpPost("{projectId:guid}/tasks/{projectTaskId:guid}")]
+    public async Task<IActionResult> AddTaskToProject(Guid projectId, Guid projectTaskId)
     {
         try
         {
@@ -338,8 +338,8 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [HttpDelete("{projectId:int}/tasks/{projectTaskId:int}")]
-    public async Task<IActionResult> RemoveTaskFromProject(int projectId, int projectTaskId)
+    [HttpDelete("{projectId:guid}/tasks/{projectTaskId:guid}")]
+    public async Task<IActionResult> RemoveTaskFromProject(Guid projectId, Guid projectTaskId)
     {
         try
         {

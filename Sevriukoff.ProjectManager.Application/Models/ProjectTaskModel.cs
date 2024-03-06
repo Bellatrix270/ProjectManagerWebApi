@@ -5,8 +5,8 @@ namespace Sevriukoff.ProjectManager.Application.Models;
 
 public class ProjectTaskModel
 {
-    public int Id { get; set; }
-    public int ProjectId { get; set; }
+    public Guid Id { get; set; }
+    public Guid ProjectId { get; set; }
     public string Name { get; set; }
     public Guid CreatedById { get; set; }
     public EmployeeModel? CreatedBy { get; set; }

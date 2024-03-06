@@ -35,7 +35,7 @@ public class ManagerProjectUpdateStrategy : IProjectUpdateStrategy
         return await _projectRepository.UpdateAsync(project);
     }
 
-    private async Task<Project> GetProjectAsync(int id)
+    private async Task<Project> GetProjectAsync(Guid id)
     {
         if (_cachedProject != null && _cachedProject.Id == id)
             return _cachedProject;

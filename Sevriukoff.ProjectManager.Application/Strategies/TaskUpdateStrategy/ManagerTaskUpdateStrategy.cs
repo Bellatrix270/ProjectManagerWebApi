@@ -38,7 +38,7 @@ public class ManagerTaskUpdateStrategy : ITaskUpdateStrategy
         return await _projectTaskRepository.UpdateAsync(task);
     }
     
-    private ProjectTask GetTask(int taskId)
+    private ProjectTask GetTask(Guid taskId)
     {
         if (_cachedTask != null && _cachedTask.Id == taskId)
             return _cachedTask;

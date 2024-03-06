@@ -3,7 +3,7 @@ using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Base;
 
-internal class SpecificationEvaluator<TEntity> where TEntity : BaseEntity
+internal class SpecificationEvaluator<TEntity, TId> where TEntity : class, IBaseEntity<TId>
 {
     public static IQueryable<TEntity> GetQuery(IQueryable<TEntity> query, ISpecification<TEntity>? specifications)
     {

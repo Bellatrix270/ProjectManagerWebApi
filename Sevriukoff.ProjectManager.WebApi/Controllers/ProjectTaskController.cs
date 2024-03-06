@@ -71,7 +71,7 @@ public class ProjectTaskController : ControllerBase
     [ProducesResponseType(typeof(ProjectTaskModel), 200)]
     [ProducesResponseType(404)]
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> Get(Guid id)
     {
         var task = await _projectTaskService.GetByIdAsync(id);
         
@@ -139,8 +139,8 @@ public class ProjectTaskController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Put(int id, [FromBody]ProjectTaskModel projectTaskModel)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Put(Guid id, [FromBody]ProjectTaskModel projectTaskModel)
     {
         try
         {
@@ -178,8 +178,8 @@ public class ProjectTaskController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
     [Authorize(Policy = nameof(UserRole.Administrator))]
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
         var success = await _projectTaskService.DeleteAsync(id);
         

@@ -4,7 +4,7 @@ using Sevriukoff.ProjectManager.Infrastructure.Entities.TypeConfigurations;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
 
-public class Project : BaseEntity
+public class Project : BaseEntity<Guid>
 {
     public string Name { get; set; }
     public string CustomerCompany { get; set; }

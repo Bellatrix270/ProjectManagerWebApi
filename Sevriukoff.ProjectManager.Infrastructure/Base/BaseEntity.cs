@@ -1,6 +1,21 @@
-﻿namespace Sevriukoff.ProjectManager.Infrastructure.Base;
+﻿using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
-public abstract class BaseEntity
+namespace Sevriukoff.ProjectManager.Infrastructure.Base;
+
+/// <summary>
+/// Базовый класс, представляющий сущность с уникальным идентификатором.
+/// </summary>
+/// <typeparam name="T">Тип идентификатора.</typeparam>
+public abstract class BaseEntity<T> : IBaseEntity<T>
 {
-    public int Id { get; set; }
+    /// <summary>
+    /// Получает или задает уникальный идентификатор сущности.
+    /// </summary>
+    public T Id { get; set; }
+    
+    // Пример других свойств.
+    // public DateTime? CreatedAt { get; set; }
+    // public T UserIdCreated { get; set; }
+    // public DateTime? AtModified { get; set; }
+    // public T UserIdModified { get; set; }
 }

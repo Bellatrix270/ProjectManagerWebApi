@@ -3,9 +3,9 @@ using Sevriukoff.ProjectManager.Infrastructure.Base;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Entities;
 
-public class ProjectTask : BaseEntity
+public class ProjectTask : BaseEntity<Guid>
 {
-    public int ProjectId { get; set; }
+    public Guid ProjectId { get; set; }
     public string Name { get; set; }
     public Guid CreatedById { get; set; }
     public Guid? AssignedToId { get; set; }

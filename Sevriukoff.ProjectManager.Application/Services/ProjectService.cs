@@ -35,14 +35,14 @@ public class ProjectService : IProjectService
         return projects.Select(MapperWrapper.Map<ProjectModel>);
     }
 
-    public async Task<ProjectModel?> GetByIdAsync(int id)
+    public async Task<ProjectModel?> GetByIdAsync(Guid id)
     {
         var project = await _projectRepository.GetByIdAsync(id);
 
         return MapperWrapper.Map<Project, ProjectModel>(project);
     }
 
-    public async Task<int> AddAsync(ProjectModel projectModel)
+    public async Task<Guid> AddAsync(ProjectModel projectModel)
     {
         var project = MapperWrapper.Map<Project>(projectModel);
         var id = await _projectRepository.AddAsync(project);
@@ -60,7 +60,7 @@ public class ProjectService : IProjectService
         return await strategy.UpdateAsync(projectModel, userContext);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         return await _projectRepository.DeleteAsync(id);
     }
@@ -79,7 +79,7 @@ public class ProjectService : IProjectService
         if (userContext.Role != UserRole.Administrator)
             combinedSpec = combinedSpec.And(managerSpec);
 
-        var filtered = (await _projectRepository.GetBySpecificationAsync(combinedSpec)).ToList();
+        var filtered = (await _projectRepository.GetAllAsync(combinedSpec)).ToList();
 
         var projects = filtered.Select(MapperWrapper.Map<ProjectModel>).ToList();
         
@@ -100,7 +100,7 @@ public class ProjectService : IProjectService
         return projects;
     }
     
-    public async Task<bool> AddEmployeeToProjectAsync(int projectId, Guid employeeId, UserContext userContext)
+    public async Task<bool> AddEmployeeToProjectAsync(Guid projectId, Guid employeeId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
@@ -118,7 +118,7 @@ public class ProjectService : IProjectService
         return await _projectRepository.AddEmployeeToProjectAsync(projectId, employeeId);
     }
 
-    public async Task<bool> RemoveEmployeeFromProjectAsync(int projectId, Guid employeeId, UserContext userContext)
+    public async Task<bool> RemoveEmployeeFromProjectAsync(Guid projectId, Guid employeeId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
@@ -141,7 +141,7 @@ public class ProjectService : IProjectService
     /// <param name="taskId"></param>
     /// <param name="userContext"></param>
     /// <returns></returns>
-    public async Task<bool> AddTaskToProjectAsync(int projectId, int taskId, UserContext userContext)
+    public async Task<bool> AddTaskToProjectAsync(Guid projectId, Guid taskId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
@@ -164,7 +164,7 @@ public class ProjectService : IProjectService
         return await _projectRepository.UpdateAsync(project);
     }
 
-    public async Task<bool> RemoveTaskFromProjectAsync(int projectId, int taskId, UserContext userContext)
+    public async Task<bool> RemoveTaskFromProjectAsync(Guid projectId, Guid taskId, UserContext userContext)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)

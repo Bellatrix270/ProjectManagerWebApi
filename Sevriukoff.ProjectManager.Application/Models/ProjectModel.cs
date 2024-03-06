@@ -2,7 +2,7 @@
 
 public class ProjectModel
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public string CustomerCompany { get; set; }
     public string ExecutorCompany { get; set; }

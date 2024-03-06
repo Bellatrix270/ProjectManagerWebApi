@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     /// <response code="401">Ошибка аутентификации. Неверные учетные данные.</response>
     [HttpPost("login")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<IActionResult> Login([FromBody]EmployeeModel employee)
     {
         bool result;

@@ -5,79 +5,33 @@ using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
 namespace Sevriukoff.ProjectManager.Infrastructure.Repositories;
 
-public class ProjectRepository : IProjectRepository
+public class ProjectRepository : BaseRepository<Project, Guid, ProjectDbContext>, IProjectRepository
 {
-    private readonly ProjectDbContext _context;
+    public ProjectRepository(ProjectDbContext context) : base(context) { }
 
-    public ProjectRepository(ProjectDbContext context)
+    public override async Task<IEnumerable<Project>> GetAllAsync(ISpecification<Project>? specification = null)
+        => await GetEmployeesInProjects((await base.GetAllAsync(specification)).ToList());
+
+    public override async Task<Project?> GetByIdAsync(Guid id)
+        => await GetEmployeeInProject(await base.GetByIdAsync(id));
+
+    public async Task<bool> AddEmployeeToProjectAsync(Guid projectId, Guid employeeId)
     {
-        _context = context;
+        await Context.ProjectEmployee.AddAsync(new ProjectEmployee { ProjectId = projectId, EmployeeId = employeeId });
+        return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<IEnumerable<Project>> GetAllAsync(ISpecification<Project>? specification = null)
+    public async Task<bool> RemoveEmployeeFromProjectAsync(Guid projectId, Guid employeeId)
     {
-        if (specification != null)
-        {
-            return await GetEmployeesInProject
-            (
-                await SpecificationEvaluator<Project>.GetQuery(_context.Set<Project>().AsQueryable(), specification)
-                .ToListAsync()
-            );
-        }
-        
-        return await GetEmployeesInProject
-        (
-            await _context.Projects.ToListAsync()
-        );
+        var projectEmployee = await Context.ProjectEmployee.FindAsync(projectId, employeeId);
+        await Context.ProjectEmployee.AddAsync(projectEmployee!);
+        return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<Project?> GetByIdAsync(int id, ISpecification<Project> specification = null)
-        => await GetEmployeeInProject(await _context.Projects.Include(x => x.Tasks)
-            .FirstOrDefaultAsync(p => p.Id == id));
-
-    public async Task<int> AddAsync(Project project)
-    {
-        await _context.Projects.AddAsync(project);
-        await _context.SaveChangesAsync();
-
-        return project.Id;
-    }
-
-    public async Task<bool> UpdateAsync(Project project)
-    {
-        _context.Projects.Update(project);
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    public async Task<bool> DeleteAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<IEnumerable<Project>> GetBySpecificationAsync(ISpecification<Project> specification)
-    {
-        var query = SpecificationEvaluator<Project>.GetQuery(_context.Set<Project>().AsQueryable(),
-            specification);
-        
-        return await GetEmployeesInProject(await query.ToListAsync());
-    }
-
-    public async Task<bool> AddEmployeeToProjectAsync(int projectId, Guid employeeId)
-    {
-        await _context.ProjectEmployee.AddAsync(new ProjectEmployee { ProjectId = projectId, EmployeeId = employeeId });
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    public async Task<bool> RemoveEmployeeFromProjectAsync(int projectId, Guid employeeId)
-    {
-        var projectEmployee = await _context.ProjectEmployee.FindAsync(projectId, employeeId);
-        await _context.ProjectEmployee.AddAsync(projectEmployee!);
-        return await _context.SaveChangesAsync() > 0;
-    }
-
+    [Obsolete("Use specification instead")]
     public async Task<IEnumerable<Project>> GetByFilters(DateTime? startDateFrom, DateTime? startDateTo, int? priority)
     {
-        var query = _context.Projects.AsQueryable();
+        var query = Context.Projects.AsQueryable();
 
         if (startDateFrom != null)
             query = query.Where(p => p.StartDate >= startDateFrom);
@@ -91,13 +45,15 @@ public class ProjectRepository : IProjectRepository
         return await query.ToListAsync();
     }
 
+    #region privateMethods
+    
     private async Task<Project?> GetEmployeeInProject(Project? project)
     {
         if (project == null)
             return null;
         
         //TODO: Я в ручную добавлял внешний ключ на проекты, можно написать sql запрос в ручную для оптимизации.
-        var projectEmployees = await _context.ProjectEmployee
+        var projectEmployees = await Context.ProjectEmployee
             .Where(pe => pe.ProjectId == project.Id)
             .Select(pe => pe.EmployeeId)
             .ToListAsync();
@@ -107,7 +63,7 @@ public class ProjectRepository : IProjectRepository
         return project;
     }
 
-    private async Task<List<Project>> GetEmployeesInProject(List<Project> projects)
+    private async Task<List<Project>> GetEmployeesInProjects(List<Project> projects)
     {
         foreach (var project in projects)
         {
@@ -116,4 +72,6 @@ public class ProjectRepository : IProjectRepository
         
         return projects;
     }
+    
+    #endregion
 }
