@@ -2,7 +2,7 @@
 
 namespace Sevriukoff.ProjectManager.WebApi.ViewModels.ProjectTask;
 
-public class ProjectTaskUpdateViewModel
+public class ProjectTaskUpdateViewModel : ProjectTaskCreateViewModel
 {
     public Guid Id { get; set; }
 }

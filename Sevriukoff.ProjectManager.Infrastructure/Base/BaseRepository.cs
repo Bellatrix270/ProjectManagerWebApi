@@ -35,18 +35,24 @@ public abstract class BaseRepository<T, TId, TContext> : IRepository<T, TId>
 
     public async Task<bool> UpdateAsync(T entity)
     {
-        Context.Set<T>().Update(entity);
+        var existingEntity = await Context.Set<T>().FindAsync(entity.Id);
+        
+        if (existingEntity == null)
+            return false;
+        
+        Context.Entry(existingEntity).CurrentValues.SetValues(entity);
         return await Context.SaveChangesAsync() > 0;
     }
 
+
     public async Task<bool> DeleteAsync(TId id)
     {
-        var entity = await Context.Set<T>().FindAsync(id);
+        var existingEntity = await Context.Set<T>().FindAsync(id);
         
-        if (entity == null)
+        if (existingEntity == null)
             return false;
 
-        Context.Set<T>().Remove(entity);
+        Context.Set<T>().Remove(existingEntity);
         return await Context.SaveChangesAsync() > 0;
     }
 }
