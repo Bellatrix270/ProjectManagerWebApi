@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Interfaces;
+using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
-using Sevriukoff.ProjectManager.Infrastructure.Entities;
 using Sevriukoff.ProjectManager.WebApi.Helpers;
+using Sevriukoff.ProjectManager.WebApi.ViewModels.Project;
+using Sevriukoff.ProjectManager.WebApi.ViewModels.ProjectTask;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
@@ -39,19 +41,20 @@ public class ProjectTaskController : ControllerBase
     /// <response code="401">Доступ запрещен. Пользователь не авторизован или имеет не достаточный уровень прав.</response>
     [ProducesResponseType(typeof(IEnumerable<ProjectTaskModel>), 200)]
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] ProjectTaskQueryParameters queryParameters)
+    public async Task<ActionResult<IEnumerable<ProjectTaskViewModel>>> GetAll([FromQuery]ProjectTaskQueryParameters queryParameters)
     {
         var userContext = UserContextHelper.GetUserContext(User);
-    
-        return Ok(await _projectTaskService.GetFilteredAndSortedAsync(
-            queryParameters.Status, 
-            queryParameters.Priority, 
-            queryParameters.CreatedById, 
+        var projectTasksModel = await _projectTaskService.GetFilteredAndSortedAsync(
+            queryParameters.Status,
+            queryParameters.Priority,
+            queryParameters.CreatedById,
             queryParameters.AssignedToId,
-            queryParameters.SortBy, 
-            userContext, 
+            queryParameters.SortBy,
+            userContext,
             queryParameters.Includes?.Split(';') ?? Array.Empty<string>()
-        ));
+        );
+    
+        return Ok(projectTasksModel.Select(MapperWrapper.Map<ProjectTaskViewModel>));
     }
     
     /// <summary>
@@ -70,10 +73,10 @@ public class ProjectTaskController : ControllerBase
     /// <response code="404">Задача с указанным идентификатором не найдена.</response>
     [ProducesResponseType(typeof(ProjectTaskModel), 200)]
     [ProducesResponseType(404)]
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> Get(Guid id)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<ProjectTaskViewModel>> Get(Guid id)
     {
-        var task = await _projectTaskService.GetByIdAsync(id);
+        var task = MapperWrapper.Map<ProjectTaskModel, ProjectTaskViewModel>(await _projectTaskService.GetByIdAsync(id));
         
         return task == null ? NotFound() : Ok(task);
     }
@@ -95,7 +98,7 @@ public class ProjectTaskController : ControllerBase
     ///     }
     /// 
     /// </remarks>
-    /// <param name="projectTaskModel">Модель задачи проекта для создания.</param>
+    /// <param name="projectTaskViewModel">Модель задачи проекта для создания.</param>
     /// <returns>Созданную задачу проекта.</returns>
     /// <response code="201">Возвращает созданную задачу проекта.</response>
     /// <response code="400">Возвращается в случае, если переданы некорректные данные для создания задачи.</response>
@@ -104,10 +107,12 @@ public class ProjectTaskController : ControllerBase
     [ProducesResponseType(400)]
     [Authorize(Policy = nameof(UserRole.Manager))]
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody]ProjectTaskModel projectTaskModel)
+    public async Task<IActionResult> Post([FromBody]ProjectTaskCreateViewModel projectTaskViewModel)
     {
         try
         {
+            var projectTaskModel = MapperWrapper.Map<ProjectTaskModel>(projectTaskViewModel);
+            
             var id = await _projectTaskService.AddAsync(projectTaskModel);
             return CreatedAtAction(nameof(Get), new { id }, id);
         }
@@ -130,7 +135,7 @@ public class ProjectTaskController : ControllerBase
     /// 
     /// </remarks>
     /// <param name="id">Идентификатор задачи проекта для обновления.</param>
-    /// <param name="projectTaskModel">Модель задачи проекта с обновленными данными.</param>
+    /// <param name="projectTaskViewModel">Модель задачи проекта с обновленными данными.</param>
     /// <returns>Без содержимого.</returns>
     /// <response code="204">Возвращает успешный результат обновления задачи проекта.</response>
     /// <response code="400">Возвращается в случае, если переданы некорректные данные для обновления задачи.</response>
@@ -140,13 +145,14 @@ public class ProjectTaskController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Put(Guid id, [FromBody]ProjectTaskModel projectTaskModel)
+    public async Task<IActionResult> Put(Guid id, [FromBody]ProjectTaskUpdateViewModel projectTaskViewModel)
     {
         try
         {
             var userContext = UserContextHelper.GetUserContext(User);
             
-            projectTaskModel.Id = id;
+            projectTaskViewModel.Id = id;
+            var projectTaskModel = MapperWrapper.Map<ProjectTaskModel>(projectTaskViewModel);
 
             var success = await _projectTaskService.UpdateAsync(projectTaskModel, userContext);
             

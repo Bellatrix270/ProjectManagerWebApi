@@ -2,7 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
+using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.Infrastructure.Authorization;
+using Sevriukoff.ProjectManager.WebApi.ViewModels;
+using Sevriukoff.ProjectManager.WebApi.ViewModels.Employee;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
@@ -32,11 +36,9 @@ public class EmployeeController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<EmployeeModel>), 200)]
     [ProducesResponseType(401)]
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return Ok(await _employeeService.GetAllAsync());
-    }
-    
+    public async Task<ActionResult<IEnumerable<EmployeeViewModel>>> GetAll()
+        => Ok((await _employeeService.GetAllAsync()).Select(MapperWrapper.Map<EmployeeViewModel>));
+
     /// <summary>
     /// Получает информацию о сотруднике по его идентификатору.
     /// </summary>
@@ -49,9 +51,9 @@ public class EmployeeController : ControllerBase
     [ProducesResponseType(401)]
     [ProducesResponseType(404)]
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Get(Guid id)
+    public async Task<ActionResult<EmployeeViewModel>> Get(Guid id)
     {
-        var employee = await _employeeService.GetByIdAsync(id);
+        var employee = MapperWrapper.Map<EmployeeModel, EmployeeViewModel>(await _employeeService.GetByIdAsync(id));
         
         return employee == null ? NotFound() : Ok(employee);
     }
@@ -64,7 +66,6 @@ public class EmployeeController : ControllerBase
     /// 
     ///     POST /api/v1/employee
     ///     {
-    ///         "id": "a62b3a2f-93be-4db2-ac46-9045a320d44b",
     ///         "UserName": "IgorSeff",
     ///         "FirstName": "Igor",
     ///         "LastName": "Sevriukoff",
@@ -75,7 +76,7 @@ public class EmployeeController : ControllerBase
     ///     }
     /// 
     /// </remarks>
-    /// <param name="employeeModel">Модель нового сотрудника.</param>
+    /// <param name="employeeViewModel">Модель нового сотрудника.</param>
     /// <returns>Результат регистрации нового сотрудника.</returns>
     /// <response code="201">Сотрудник успешно зарегистрирован.</response>
     /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
@@ -84,11 +85,13 @@ public class EmployeeController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody]EmployeeModel employeeModel)
+    public async Task<IActionResult> Post([FromBody]EmployeeCreateViewModel employeeViewModel)
     {
         try
         {
-            var (id, errors) = await _authService.RegisterAsync(employeeModel);
+            var employeeModel = MapperWrapper.Map<EmployeeModel>(employeeViewModel);
+            
+            var (id, errors) = await _authService.RegisterAsync(employeeModel, employeeViewModel.Password);
 
             if (!errors.Any())
                 return CreatedAtAction(nameof(Get), new { id }, id);
@@ -107,14 +110,14 @@ public class EmployeeController : ControllerBase
     /// <remarks>
     /// Пример запроса:
     /// 
-    ///     POST /api/v1/employee/a62b3a2f-93be-4db2-ac46-9045a320d44b
+    ///     PUT /api/v1/employee/a62b3a2f-93be-4db2-ac46-9045a320d44b
     ///     {
     ///         "Email": "igor.seff270@example.com",
     ///     }
     /// 
     /// </remarks>
     /// <param name="id">Идентификатор сотрудника.</param>
-    /// <param name="employeeModel">Модель обновленной информации о сотруднике.</param>
+    /// <param name="employeeViewModel">Модель обновленной информации о сотруднике.</param>
     /// <returns>Результат обновления информации о сотруднике.</returns>
     /// <response code="204">Информация о сотруднике успешно обновлена.</response>
     /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
@@ -125,12 +128,14 @@ public class EmployeeController : ControllerBase
     [ProducesResponseType(401)]
     [ProducesResponseType(404)]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Put(Guid id, [FromBody]EmployeeModel employeeModel)
+    public async Task<IActionResult> Put(Guid id, [FromBody]EmployeeUpdateViewModel employeeViewModel)
     {
         try
         {
-            employeeModel.Id = id;
+            employeeViewModel.Id = id;
 
+            var employeeModel = MapperWrapper.Map<EmployeeModel>(employeeViewModel);
+            
             var success = await _employeeService.UpdateAsync(employeeModel);
             
             if (!success)

@@ -8,28 +8,36 @@ namespace Sevriukoff.ProjectManager.Application.Mapping;
 
 public static class MapperWrapper
 {
-    private static bool _initialized = false;
-    private static readonly object _lock = new object();
+    private static bool _initialized;
+    private static readonly object Lock = new();
+    private static readonly MapperWrapperConfiguration WrapperConfiguration = new(); 
+    
+    private static readonly List<IMapperConfiguration> MapperConfigurations = new();
+
+    public static void AddConfiguration(IMapperConfiguration mapperConfiguration)
+    {
+        MapperConfigurations.Add(mapperConfiguration);
+    }
 
     private static void Initialize()
     {
         if (!_initialized)
         {
-            lock (_lock)
+            lock (Lock)
             {
                 if (!_initialized)
                 {
-                    TypeDescriptor.AddAttributes(typeof(Employee),
-                        new TypeConverterAttribute(typeof(EmployeeClassConverter)));
+                    WrapperConfiguration.Bind<Employee, EmployeeModel>();
+                    WrapperConfiguration.Bind<EmployeeModel, Employee>();
                     
-                    TinyMapper.Bind<Employee, EmployeeModel>();
-                    TinyMapper.Bind<EmployeeModel, Employee>();
+                    WrapperConfiguration.Bind<Project, ProjectModel>(c => c.Ignore(x => x.Employees));
+                    WrapperConfiguration.Bind<ProjectModel, Project>();
                     
-                    TinyMapper.Bind<Project, ProjectModel>(c => c.Ignore(x => x.Employees));
-                    TinyMapper.Bind<ProjectModel, Project>();
+                    WrapperConfiguration.Bind<ProjectTask, ProjectTaskModel>();
+                    WrapperConfiguration.Bind<ProjectTaskModel, ProjectTask>();
                     
-                    TinyMapper.Bind<ProjectTask, ProjectTaskModel>();
-                    TinyMapper.Bind<ProjectTaskModel, ProjectTask>();
+                    foreach (var configuration in MapperConfigurations)
+                        configuration.Configure(WrapperConfiguration);
 
                     _initialized = true;
                 }

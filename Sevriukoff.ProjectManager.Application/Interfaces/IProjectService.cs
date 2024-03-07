@@ -18,8 +18,12 @@ public interface IProjectService
 
     Task<bool> AddTaskToProjectAsync(Guid projectId, Guid taskId, UserContext userContext);
     Task<bool> RemoveTaskFromProjectAsync(Guid projectId, Guid taskId, UserContext userContext);
+
+    #region Obsolute
     
     //Task<ISpecification<ProjectModel>> GetFilteredAsync(DateTime? startDateFrom, DateTime? startDateTo, int? priority);
     //Task<ISpecification<ProjectModel>> GetSortedAsync(string? sortBy, bool? ascending = true);
     //Task<IEnumerable<ProjectModel>> GetBySpecification(params ISpecification<ProjectModel>[] specifications);
+    
+    #endregion
 }

@@ -16,9 +16,9 @@ public class AuthService : IAuthService
         _authManager = authManager;
     }
     
-    public async Task<(Guid Id, IEnumerable<IdentityError> Errors)> RegisterAsync(EmployeeModel employee)
+    public async Task<(Guid Id, IEnumerable<IdentityError> Errors)> RegisterAsync(EmployeeModel employee, string password)
     {
-        return await _authManager.RegisterAsync(MapperWrapper.Map<Employee>(employee), employee.Password);
+        return await _authManager.RegisterAsync(MapperWrapper.Map<Employee>(employee), password);
     }
 
     public async Task<bool> LoginByIdAsync(Guid employeeId, string password)

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Sevriukoff.ProjectManager.Application.Factories;
 using Sevriukoff.ProjectManager.Application.Interfaces;
+using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Application.Services;
 using Sevriukoff.ProjectManager.Application.Strategies.ProjectUpdateStrategy;
@@ -13,6 +14,8 @@ using Sevriukoff.ProjectManager.Infrastructure;
 using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 using Sevriukoff.ProjectManager.Infrastructure.Repositories;
+using Sevriukoff.ProjectManager.WebApi.Mapping;
+using MapperConfiguration = Sevriukoff.ProjectManager.WebApi.Mapping.MapperConfiguration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,6 +130,7 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
+MapperWrapper.AddConfiguration(new MapperConfiguration());
 
 var app = builder.Build();
 

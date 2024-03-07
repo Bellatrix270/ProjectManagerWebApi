@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
+using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.WebApi.Helpers;
+using Sevriukoff.ProjectManager.WebApi.ViewModels.Project;
 using ValidationException = Sevriukoff.ProjectManager.Application.Exception.ValidationException;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
@@ -42,9 +44,9 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(404)]
     [Authorize(Policy = nameof(UserRole.Administrator))]
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Get(Guid id)
+    public async Task<ActionResult<ProjectViewModel>> Get(Guid id)
     {
-        var project = await _projectService.GetByIdAsync(id);
+        var project = MapperWrapper.Map<ProjectModel, ProjectViewModel>(await _projectService.GetByIdAsync(id));
         
         return project == null ? NotFound() : Ok(project);
     }
@@ -66,7 +68,7 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<ProjectModel>), 200)]
     [ProducesResponseType(400)]
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] ProjectQueryParameters queryParameters)
+    public async Task<ActionResult<IEnumerable<ProjectViewModel>>> GetAll([FromQuery] ProjectQueryParameters queryParameters)
     {
         try
         {
@@ -74,18 +76,38 @@ public class ProjectController : ControllerBase
             var queryCount = HttpContext.Request.Query.Count;
             var userContext = UserContextHelper.GetUserContext(User);
 
-            if ((userRole == nameof(UserRole.Administrator) && queryCount == 1 && !string.IsNullOrEmpty(queryParameters.Includes)) ||
+            IEnumerable<ProjectModel> projectsModel;
+
+            if ((userRole == nameof(UserRole.Administrator) && queryCount == 1 &&
+                 !string.IsNullOrEmpty(queryParameters.Includes)) ||
                 (userRole == nameof(UserRole.Administrator) && queryCount == 0))
-                return Ok(await _projectService.GetAllAsync(queryParameters.Includes?.Split(';') ?? Array.Empty<string>()));
+            {
+                projectsModel = await _projectService.GetAllAsync
+                (
+                    queryParameters.Includes?.Split(';') ?? Array.Empty<string>()
+                );
+            }
+            else
+            {
+                projectsModel = await _projectService.GetFilteredAndSortedAsync
+                (
+                    queryParameters.StartDateFrom,
+                    queryParameters.StartDateTo,
+                    queryParameters.Priority,
+                    queryParameters.SortBy,
+                    userContext,
+                    queryParameters.Includes?.Split(';') ?? Array.Empty<string>()
+                );
+            }
 
-            return Ok(await _projectService.GetFilteredAndSortedAsync(queryParameters.StartDateFrom, queryParameters.StartDateTo, queryParameters.Priority, queryParameters.SortBy, userContext, queryParameters.Includes?.Split(';') ?? Array.Empty<string>()));
-
+            return Ok(projectsModel.Select(MapperWrapper.Map<ProjectViewModel>));
         }
         catch (SpecificationException ex)
         {
             return BadRequest(ex.Message);
         }
     }
+
     
     /// <summary>
     /// Создает новый проект.
@@ -105,7 +127,7 @@ public class ProjectController : ControllerBase
     ///     }
     /// 
     /// </remarks>
-    /// <param name="projectModel">Модель нового проекта.</param>
+    /// <param name="projectViewModel">Модель нового проекта.</param>
     /// <returns>Результат создания нового проекта.</returns>
     /// <response code="201">Проект успешно создан.</response>
     /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
@@ -114,10 +136,12 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(400)]
     [Authorize(Policy = nameof(UserRole.Administrator))]
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody]ProjectModel projectModel)
+    public async Task<IActionResult> Post([FromBody]ProjectCreateViewModel projectViewModel)
     {
         try
         {
+            var projectModel = MapperWrapper.Map<ProjectModel>(projectViewModel);
+            
             var id = await _projectService.AddAsync(projectModel);
             return CreatedAtAction(nameof(Get), new { id }, id);
         }
@@ -141,7 +165,7 @@ public class ProjectController : ControllerBase
     /// 
     /// </remarks>
     /// <param name="id">Идентификатор проекта.</param>
-    /// <param name="projectModel">Модель обновленной информации о проекте.</param>
+    /// <param name="projectViewModel">Модель обновленной информации о проекте.</param>
     /// <returns>Результат обновления информации о проекте.</returns>
     /// <response code="204">Информация о проекте успешно обновлена.</response>
     /// <response code="400">Ошибка в запросе или неверные данные. Подробности в сообщении об ошибке.</response>
@@ -151,13 +175,14 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Put(Guid id, [FromBody]ProjectModel projectModel)
+    public async Task<IActionResult> Put(Guid id, [FromBody]ProjectUpdateViewModel projectViewModel)
     {
         try
         {
             var userContext = UserContextHelper.GetUserContext(User);
             
-            projectModel.Id = id;
+            projectViewModel.Id = id;
+            var projectModel = MapperWrapper.Map<ProjectModel>(projectViewModel);
 
             var success = await _projectService.UpdateAsync(projectModel, userContext);
             
@@ -307,7 +332,7 @@ public class ProjectController : ControllerBase
         {
             var userContext = UserContextHelper.GetUserContext(User);
             
-            var success = await _projectService.AddTaskToProjectAsync(projectId, projectId, userContext);
+            var success = await _projectService.AddTaskToProjectAsync(projectId, projectTaskId, userContext);
             if (!success)
                 return NotFound();
 

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Models;
+using Sevriukoff.ProjectManager.WebApi.ViewModels;
+using Sevriukoff.ProjectManager.WebApi.ViewModels.Employee;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
@@ -29,16 +31,24 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     [ProducesResponseType(200)]
     [ProducesResponseType(401)]
-    public async Task<IActionResult> Login([FromBody]EmployeeModel employee)
+    public async Task<IActionResult> Login([FromBody]LoginViewModel employee)
     {
         bool result;
         
-        if (!string.IsNullOrEmpty(employee.Email))
-            result = await _authService.LoginByEmailAsync(employee.Email, employee.Password);
-        else if (!string.IsNullOrEmpty(employee.UserName))
-            result = await _authService.LoginByUserNameAsync(employee.UserName, employee.Password);
-        else
-            result = await _authService.LoginByIdAsync(employee.Id!.Value, employee.Password);
+        switch (employee)
+        {
+            case LoginByEmailViewModel loginByEmailVm:
+                result = await _authService.LoginByEmailAsync(loginByEmailVm.Email, employee.Password);
+                break;
+            case LoginByNameViewModel loginByNameVm:
+                result = await _authService.LoginByUserNameAsync(loginByNameVm.Username, employee.Password);
+                break;
+            case LoginByIdViewModel loginByIdlVm:
+                result = await _authService.LoginByIdAsync(loginByIdlVm.Id, employee.Password);
+                break;
+            default:
+                return BadRequest("Неверный формат данных для входа.");
+        }
 
         return result ? Ok() : BadRequest();
     }
