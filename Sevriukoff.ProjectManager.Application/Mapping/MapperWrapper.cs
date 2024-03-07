@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using Microsoft.AspNetCore.Identity;
 using Nelibur.ObjectMapper;
+using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
@@ -35,6 +37,9 @@ public static class MapperWrapper
                     
                     WrapperConfiguration.Bind<ProjectTask, ProjectTaskModel>();
                     WrapperConfiguration.Bind<ProjectTaskModel, ProjectTask>();
+                    
+                    WrapperConfiguration.Bind<ValidationError, IdentityError>();
+                    WrapperConfiguration.Bind<IdentityError, ValidationError>();
                     
                     foreach (var configuration in MapperConfigurations)
                         configuration.Configure(WrapperConfiguration);

@@ -14,7 +14,6 @@ using Sevriukoff.ProjectManager.Infrastructure;
 using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 using Sevriukoff.ProjectManager.Infrastructure.Repositories;
-using Sevriukoff.ProjectManager.WebApi.Mapping;
 using MapperConfiguration = Sevriukoff.ProjectManager.WebApi.Mapping.MapperConfiguration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +32,7 @@ builder.Services.AddDbContext<AuthDbContext>(
         cfg.Password.RequireNonAlphanumeric = false;
         cfg.Password.RequireUppercase = false;
         cfg.Password.RequiredLength = 9;
+        cfg.User.RequireUniqueEmail = true;
     })
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
