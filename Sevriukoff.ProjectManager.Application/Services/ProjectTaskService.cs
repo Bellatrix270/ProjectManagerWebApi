@@ -5,8 +5,6 @@ using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.Application.Specification;
 using Sevriukoff.ProjectManager.Application.Specification.ProjectTask;
-using Sevriukoff.ProjectManager.Application.Strategies.TaskUpdateStrategy;
-using Sevriukoff.ProjectManager.Infrastructure.Authorization;
 using Sevriukoff.ProjectManager.Infrastructure.Entities;
 using Sevriukoff.ProjectManager.Infrastructure.Interfaces;
 
@@ -41,22 +39,32 @@ public class ProjectTaskService : IProjectTaskService
         return MapperWrapper.Map<ProjectTask, ProjectTaskModel>(projectTask);
     }
 
-    public async Task<Guid> AddAsync(ProjectTaskModel projectTaskModel)
+    public async Task<(Guid? Id, IEnumerable<ValidationError> Errors)> AddAsync(ProjectTaskModel projectTaskModel)
     {
+        var (isValid, errors) = projectTaskModel.IsValid();
+        
+        if (!isValid)
+            return (null, errors);
+        
         var projectTask = MapperWrapper.Map<ProjectTask>(projectTaskModel);
         var id = await _projectTaskRepository.AddAsync(projectTask);
 
-        return id;
+        return (id, errors);
     }
     
-    public async Task<bool> UpdateAsync(ProjectTaskModel projectTaskModel, UserContext userContext)
+    public async Task<(bool success, IEnumerable<ValidationError> Errors)> UpdateAsync(ProjectTaskModel projectTaskModel, UserContext userContext)
     {
+        var (isValid, errors) = projectTaskModel.IsValid();
+        
+        if (!isValid)
+            return (isValid, errors);
+        
         var strategy = _strategyFactory.CreateStrategy(userContext);
 
         if (!strategy.CanUpdate(projectTaskModel, userContext))
             throw new AccessDeniedException("У вас нет прав на изменение задачи.");
 
-        return await strategy.UpdateAsync(projectTaskModel, userContext);
+        return (await strategy.UpdateAsync(projectTaskModel, userContext), errors);
     }
 
     public async Task<bool> DeleteAsync(Guid id)

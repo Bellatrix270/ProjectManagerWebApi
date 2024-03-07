@@ -7,7 +7,6 @@ using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.WebApi.Helpers;
 using Sevriukoff.ProjectManager.WebApi.ViewModels.Project;
-using ValidationException = Sevriukoff.ProjectManager.Application.Exception.ValidationException;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
 
@@ -142,10 +141,14 @@ public class ProjectController : ControllerBase
         {
             var projectModel = MapperWrapper.Map<ProjectModel>(projectViewModel);
             
-            var id = await _projectService.AddAsync(projectModel);
-            return CreatedAtAction(nameof(Get), new { id }, id);
+            var (id, errors) = await _projectService.AddAsync(projectModel);
+
+            if (!errors.Any())
+                return CreatedAtAction(nameof(Get), new { id }, id);
+
+            return BadRequest(errors);
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -184,14 +187,16 @@ public class ProjectController : ControllerBase
             projectViewModel.Id = id;
             var projectModel = MapperWrapper.Map<ProjectModel>(projectViewModel);
 
-            var success = await _projectService.UpdateAsync(projectModel, userContext);
-            
-            if (!success)
-                return NotFound();
+            var (success, errors) = await _projectService.UpdateAsync(projectModel, userContext);
 
-            return NoContent();
+            return success switch
+            {
+                true => NoContent(),
+                false when !errors.Any() => NotFound(),
+                _ => BadRequest(errors)
+            };
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -262,7 +267,7 @@ public class ProjectController : ControllerBase
         {
             return Unauthorized(new { errorMessage = ex.Message });
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -300,7 +305,7 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -338,7 +343,7 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -376,7 +381,7 @@ public class ProjectController : ControllerBase
 
             return NoContent();
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }

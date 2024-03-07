@@ -31,64 +31,19 @@ public class EmployeeService : IEmployeeService
         return MapperWrapper.Map<Employee, EmployeeModel>(employee);
     }
 
-    public async Task<bool> UpdateAsync(EmployeeModel employeeModel)
+    public async Task<(bool success, IEnumerable<ValidationError> Errors)> UpdateAsync(EmployeeModel employeeModel)
     {
-        if (!IsValidEmployee(employeeModel, out string errorMessage))
-        {
-            throw new ValidationException(errorMessage);
-        }
+        var (isValid, errors) = employeeModel.IsValid();
+        
+        if (!isValid)
+            return (isValid, errors);
         
         var employee = MapperWrapper.Map<Employee>(employeeModel);
-        return await _employeeRepository.UpdateAsync(employee);
+        return (await _employeeRepository.UpdateAsync(employee), errors);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
         return await _employeeRepository.DeleteAsync(id);
     }
-
-    #region Validate
-
-    private bool IsValidEmployee(EmployeeModel employeeModel, out string errorMessage)
-    {
-        errorMessage = string.Empty;
-        
-        var isValidName = !employeeModel.FirstName.Any(char.IsDigit); //TODO: Validate
-
-        if (!isValidName)
-        {
-            errorMessage = "Invalid name.";
-            return false;
-        }
-
-        if (!IsValidEmail(employeeModel.Email))
-        {
-            errorMessage = "Invalid email format.";
-            return false;
-        }
-
-        if (!IsUniqueEmail(employeeModel.Email))
-        {
-            errorMessage = "Employee with this email already exists.";
-            return false;
-        }
-        
-        return true;
-    }
-
-    private bool IsValidEmail(string email)
-    {
-        const string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-        
-        return Regex.IsMatch(email, pattern);
-    }
-
-    private bool IsUniqueEmail(string email)
-    {
-        var existingEmployee = _employeeRepository.GetByEmailAsync(email).GetAwaiter().GetResult();
-
-        return existingEmployee == null;
-    }
-
-    #endregion
 }

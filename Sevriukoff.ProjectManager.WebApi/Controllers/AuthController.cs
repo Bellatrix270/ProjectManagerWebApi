@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sevriukoff.ProjectManager.Application.Interfaces;
-using Sevriukoff.ProjectManager.Application.Models;
-using Sevriukoff.ProjectManager.WebApi.ViewModels;
 using Sevriukoff.ProjectManager.WebApi.ViewModels.Employee;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;

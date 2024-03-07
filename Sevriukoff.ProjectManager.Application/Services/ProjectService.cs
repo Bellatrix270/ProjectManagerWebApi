@@ -42,22 +42,32 @@ public class ProjectService : IProjectService
         return MapperWrapper.Map<Project, ProjectModel>(project);
     }
 
-    public async Task<Guid> AddAsync(ProjectModel projectModel)
+    public async Task<(Guid? Id, IEnumerable<ValidationError> Errors)> AddAsync(ProjectModel projectModel)
     {
+        var (isValid, errors) = projectModel.IsValid();
+        
+        if (!isValid)
+            return (null, errors);
+        
         var project = MapperWrapper.Map<Project>(projectModel);
         var id = await _projectRepository.AddAsync(project);
 
-        return id;
+        return (id, errors);
     }
 
-    public async Task<bool> UpdateAsync(ProjectModel projectModel, UserContext userContext)
+    public async Task<(bool success, IEnumerable<ValidationError> Errors)> UpdateAsync(ProjectModel projectModel, UserContext userContext)
     {
+        var (isValid, errors) = projectModel.IsValid();
+
+        if (!isValid)
+            return (isValid, errors);
+        
         var strategy = _strategyFactory.CreateStrategy(userContext);
 
         if (!strategy.CanUpdate(projectModel, userContext))
             throw new AccessDeniedException("У вас нет прав на изменение задачи.");
 
-        return await strategy.UpdateAsync(projectModel, userContext);
+        return (await strategy.UpdateAsync(projectModel, userContext), errors);
     }
 
     public async Task<bool> DeleteAsync(Guid id)

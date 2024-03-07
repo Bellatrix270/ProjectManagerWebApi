@@ -4,7 +4,6 @@ using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
 using Sevriukoff.ProjectManager.WebApi.Helpers;
-using Sevriukoff.ProjectManager.WebApi.ViewModels.Project;
 using Sevriukoff.ProjectManager.WebApi.ViewModels.ProjectTask;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
@@ -113,10 +112,14 @@ public class ProjectTaskController : ControllerBase
         {
             var projectTaskModel = MapperWrapper.Map<ProjectTaskModel>(projectTaskViewModel);
             
-            var id = await _projectTaskService.AddAsync(projectTaskModel);
-            return CreatedAtAction(nameof(Get), new { id }, id);
+            var (id, errors) = await _projectTaskService.AddAsync(projectTaskModel);
+
+            if (!errors.Any())
+                return CreatedAtAction(nameof(Get), new { id }, id);
+
+            return BadRequest(errors);
         }
-        catch (ArgumentException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -154,14 +157,16 @@ public class ProjectTaskController : ControllerBase
             projectTaskViewModel.Id = id;
             var projectTaskModel = MapperWrapper.Map<ProjectTaskModel>(projectTaskViewModel);
 
-            var success = await _projectTaskService.UpdateAsync(projectTaskModel, userContext);
+            var (success, errors) = await _projectTaskService.UpdateAsync(projectTaskModel, userContext);
             
-            if (!success)
-                return NotFound();
-
-            return NoContent();
+            return success switch
+            {
+                true => NoContent(),
+                false when !errors.Any() => NotFound(),
+                _ => BadRequest(errors)
+            };
         }
-        catch (ArgumentException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }

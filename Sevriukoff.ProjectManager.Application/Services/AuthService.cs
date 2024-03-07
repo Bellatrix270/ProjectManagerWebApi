@@ -18,6 +18,11 @@ public class AuthService : IAuthService
     
     public async Task<(Guid Id, IEnumerable<IdentityError> Errors)> RegisterAsync(EmployeeModel employee, string password)
     {
+        var validationResult = employee.IsValid();
+
+        if (!validationResult.IsValid)
+            return (Guid.Empty, validationResult.Errors.Select(MapperWrapper.Map<IdentityError>));
+        
         return await _authManager.RegisterAsync(MapperWrapper.Map<Employee>(employee), password);
     }
 

@@ -1,5 +1,5 @@
-﻿using Sevriukoff.ProjectManager.Application.Models;
-using Sevriukoff.ProjectManager.Infrastructure.Base;
+﻿using Sevriukoff.ProjectManager.Application.Exception;
+using Sevriukoff.ProjectManager.Application.Models;
 
 namespace Sevriukoff.ProjectManager.Application.Interfaces;
 
@@ -7,8 +7,8 @@ public interface IProjectService
 {
     Task<IEnumerable<ProjectModel>> GetAllAsync(params string[] includes);
     Task<ProjectModel?> GetByIdAsync(Guid id);
-    Task<Guid> AddAsync(ProjectModel projectModel);
-    Task<bool> UpdateAsync(ProjectModel projectModel, UserContext userContext);
+    Task<(Guid? Id, IEnumerable<ValidationError> Errors)> AddAsync(ProjectModel projectModel);
+    Task<(bool success, IEnumerable<ValidationError> Errors)> UpdateAsync(ProjectModel projectModel, UserContext userContext);
     Task<bool> DeleteAsync(Guid id);
     Task<IEnumerable<ProjectModel>> GetFilteredAndSortedAsync(DateTime? startDateFrom, DateTime? startDateTo,
         int? priority, string? sortBy, UserContext userContext, params string[] includes);

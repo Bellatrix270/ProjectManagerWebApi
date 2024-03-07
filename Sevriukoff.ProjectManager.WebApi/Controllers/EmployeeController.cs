@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sevriukoff.ProjectManager.Application.Exception;
 using Sevriukoff.ProjectManager.Application.Interfaces;
 using Sevriukoff.ProjectManager.Application.Mapping;
 using Sevriukoff.ProjectManager.Application.Models;
-using Sevriukoff.ProjectManager.Infrastructure.Authorization;
-using Sevriukoff.ProjectManager.WebApi.ViewModels;
 using Sevriukoff.ProjectManager.WebApi.ViewModels.Employee;
 
 namespace Sevriukoff.ProjectManager.WebApi.Controllers;
@@ -98,7 +95,7 @@ public class EmployeeController : ControllerBase
 
             return BadRequest(errors);
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
@@ -133,17 +130,18 @@ public class EmployeeController : ControllerBase
         try
         {
             employeeViewModel.Id = id;
-
             var employeeModel = MapperWrapper.Map<EmployeeModel>(employeeViewModel);
             
-            var success = await _employeeService.UpdateAsync(employeeModel);
+            var (success, errors) = await _employeeService.UpdateAsync(employeeModel);
             
-            if (!success)
-                return NotFound();
-
-            return NoContent();
+            return success switch
+            {
+                true => NoContent(),
+                false when !errors.Any() => NotFound(),
+                _ => BadRequest(errors)
+            };
         }
-        catch (ValidationException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { errorMessage = ex.Message });
         }
